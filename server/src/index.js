@@ -22,4 +22,5 @@ async function tick() {
 }
 if (config.schedulerEnabled) { setTimeout(tick, 5000); setInterval(tick, 15 * 60 * 1000).unref(); }
 
-app.listen(config.port, config.host, () => console.log(`Audit Performance Platform running at http://${config.host || 'localhost'}:${config.port}`));
+const dbLabel = db.kind === 'postgres' ? (config.pgliteDir ? `PostgreSQL (PGlite, saved in ${config.pgliteDir})` : `PostgreSQL (${(config.databaseUrl.split('@')[1] || '').split('?')[0]})`) : `SQLite (${config.dbPath})`; // never print the password
+app.listen(config.port, config.host, () => console.log(`Audit Performance Platform running at http://${config.host || 'localhost'}:${config.port} | database: ${dbLabel}`));

@@ -35,7 +35,7 @@ function where(f, { dateOnly = false } = {}) {
     if (f.auditorId != null) { c.push('r.auditor_id = ?'); p.push(f.auditorId); }
     if (f.uploadId != null) { c.push('r.upload_id = ?'); p.push(f.uploadId); }
     // A project is picked by its first word ("Grainger" = every file whose project name starts with Grainger). A full project name still matches itself exactly.
-    if (f.project) { c.push(`(up.project = ? OR up.project LIKE ? ESCAPE '\\')`); p.push(f.project, f.project.replace(/[\\%_]/g, '\\$&') + ' %'); }
+    if (f.project) { c.push(`(up.project = ? OR lower(up.project) LIKE lower(?) ESCAPE '\\')`); p.push(f.project, f.project.replace(/[\\%_]/g, '\\$&') + ' %'); } // lower(): same result in SQLite and PostgreSQL
     if (f.errorCode) { c.push('EXISTS (SELECT 1 FROM error_classifications x WHERE x.audit_record_id = r.id AND x.code = ?)'); p.push(f.errorCode); }
     if (f.attribute) { c.push('EXISTS (SELECT 1 FROM record_attributes x WHERE x.audit_record_id = r.id AND lower(x.attribute) = lower(?))'); p.push(f.attribute); }
     if (f.ptStatus) {

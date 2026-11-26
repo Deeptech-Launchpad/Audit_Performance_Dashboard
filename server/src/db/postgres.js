@@ -4,7 +4,8 @@
 export async function openPostgres(url, schemaSql) {
   const pg = (await import('pg')).default;
   pg.types.setTypeParser(20, (v) => parseInt(v, 10)); // BIGINT -> number
-  const pool = new pg.Pool({ connectionString: url });
+  // allowExitOnIdle: idle connections never keep a finished script/test alive (the web server keeps the app itself running)
+  const pool = new pg.Pool({ connectionString: url, max: Number(process.env.PG_POOL_MAX) || 10, allowExitOnIdle: true, idleTimeoutMillis: 10000 });
   await pool.query(schemaSql);
   const conv = (sql) => { let i = 0; return sql.replace(/\?/g, () => '$' + (++i)); };
   const make = (q) => ({

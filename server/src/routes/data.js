@@ -55,8 +55,9 @@ export function dataRouter(db) {
     // projects are listed by their first word only (Grainger, Analog ...), the same as the Project filter
     const projects = groupProjects(await db.all(`SELECT u.project AS name, COUNT(DISTINCT u.id) AS files FROM uploads u JOIN audit_records r ON r.upload_id = u.id
       WHERE u.status = 'imported' AND u.project IS NOT NULL GROUP BY u.project`)).filter((p) => p.name.toLowerCase().includes(q.toLowerCase())).slice(0, 6);
-    const files = await db.all(`SELECT u.id, u.original_name AS name, u.audit_date AS auditDate FROM uploads u WHERE u.status = 'imported' AND lower(u.original_name) LIKE ? ORDER BY u.audit_date DESC LIMIT 6`, [like]);
-    const skus = await db.all(`SELECT r.sku_id AS skuId, b.name AS builder FROM audit_records r LEFT JOIN employees b ON b.id = r.content_employee_id
+    const files = await db.all(`SELECT u.id, u.original_name AS name, u.audit_date AS "auditDate" FROM uploads u WHERE u.status = 'imported' AND lower(u.original_name) LIKE ? ORDER BY u.audit_date DESC LIMIT 6`, [like]);
+    // names in quotes: PostgreSQL would otherwise return "skuid" / "auditdate" (SQLite keeps the case either way)
+    const skus = await db.all(`SELECT r.sku_id AS "skuId", b.name AS builder FROM audit_records r LEFT JOIN employees b ON b.id = r.content_employee_id
       WHERE lower(r.sku_id) LIKE ? GROUP BY r.sku_id, b.name ORDER BY r.sku_id LIMIT 8`, [like]);
     res.json({ people, projects, files, skus });
   }));
