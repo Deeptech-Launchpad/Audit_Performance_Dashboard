@@ -1,0 +1,78 @@
+/* "Check mistakes at the source" (Product Team member panel) and the PDF view. Uses the app's colour tokens, so light and dark both work. */
+.src-how { margin: 0 0 10px; font-size: 13.5px; color: var(--ink-2); }
+.src-foot { margin: 10px 0 0; font-size: 12.5px; color: var(--ink-3); }
+.src-foot kbd { font: inherit; font-size: 11.5px; font-weight: 650; padding: 0 5px; border-radius: 5px; border: 1px solid var(--line); background: var(--surface-2); }
+.src-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.src-item { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.src-head { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 2px; }
+.src-sku { font-size: 15px; }
+.src-item > .src-attr:first-child { border-top: 0; padding-top: 2px; }
+.src-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding-top: 8px; border-top: 1px solid var(--line-2); }
+.src-meta .src-sku { font-size: 13.5px; }
+.src-count { margin: 0 0 8px; font-size: 13.5px; color: var(--ink-2); }
+.src-other { margin-top: 12px; }
+.src-other > summary { cursor: pointer; font-size: 13.5px; font-weight: 650; color: var(--ink-2); margin-bottom: 8px; }
+.mb-s { margin-bottom: 8px; }
+.src-attr { padding: 10px 0 8px; border-top: 1px solid var(--line-2); }
+.src-name { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 15px; font-weight: 700; color: var(--ink); }
+.src-x { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; font-size: 11px; color: var(--improve); background: var(--improve-bg); }
+.src-flag { font-size: 11.5px; font-weight: 650; color: var(--improve); background: var(--improve-bg); padding: 1px 8px; border-radius: 999px; }
+.src-facts { display: grid; grid-template-columns: max-content 1fr; gap: 5px 12px; margin: 8px 0 0; font-size: 13.5px; }
+.src-facts dt { color: var(--ink-3); font-weight: 600; }
+.src-facts dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
+.src-fix { font-weight: 650; color: var(--good) !important; }
+.src-mark { background: #fff2a8; color: #1b2433; padding: 1px 4px; border-radius: 4px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.src-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 9px; }
+.src-links.tight { margin-top: 0; }
+.src-link { display: inline-flex; align-items: center; gap: 6px; }
+.src-link a { text-decoration: none; white-space: nowrap; }
+.src-host { font-size: 12px; color: var(--ink-3); }
+.src-note { flex-basis: 100%; font-size: 12.5px; color: var(--ink-3); }
+.src-comment { margin-top: 6px; font-size: 12.5px; color: var(--ink-3); }
+.src-comment summary { cursor: pointer; width: max-content; }
+.src-comment p { margin: 6px 0 0; color: var(--ink-2); white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 560px) { .src-facts { grid-template-columns: 1fr; } .src-facts dd { margin-bottom: 4px; } }
+
+/* Reports page */
+.rep-make .seg { margin-bottom: 6px; }
+.rep-hint { margin: 0 0 10px; }
+.rep-layout { grid-template-columns: minmax(240px, 310px) minmax(0, 1fr); align-items: start; }
+@media (max-width: 900px) { .rep-layout { grid-template-columns: 1fr; } }
+.rep-filter { display: flex; gap: 5px; flex-wrap: wrap; padding: 8px 12px; border-bottom: 1px solid var(--line-2); }
+.rep-list { max-height: 68vh; overflow-y: auto; }
+.rep-item { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line-2); border-left: 3px solid transparent; background: none; color: var(--ink); padding: 9px 12px; cursor: pointer; font: inherit; }
+.rep-item:hover { background: var(--surface-2); }
+.rep-item.on { background: var(--brand-soft); border-left-color: var(--brand); }
+.rep-item-t { font-size: 13px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rep-item-n { margin: 3px 0 1px; font-size: 12.5px; color: var(--ink-2); }
+.rep-head { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.rep-title { margin: 4px 0 2px; font-size: 19px; line-height: 1.25; overflow-wrap: anywhere; }
+.rep-glance { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; }
+.rep-say { margin: 0 0 12px; font-size: 14px; line-height: 1.55; color: var(--ink-2); }
+.rep-say b { color: var(--ink); }
+.rep-say .rep-good { color: var(--good); } .rep-say .rep-bad { color: var(--improve); }
+.rep-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.rep-tiles > div { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line-2); }
+.rep-tiles span { font-size: 12px; color: var(--ink-3); }
+.rep-tiles b { font-size: 21px; letter-spacing: -.02em; }
+@media (max-width: 760px) { .rep-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* PDF view (/source-view) */
+.sv { min-height: 100vh; background: var(--bg); color: var(--ink); }
+.sv-bar { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 10px 20px; padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--line); box-shadow: var(--shadow); }
+.sv-what { min-width: 0; flex: 1 1 420px; }
+.sv-title { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; font-size: 17px; font-weight: 700; }
+.sv-sku { font-size: 13px; font-weight: 600; color: var(--ink-3); }
+.sv-look { margin-top: 4px; font-size: 13.5px; color: var(--ink-2); overflow-wrap: anywhere; }
+.sv-look mark { background: #fff2a8; color: #1b2433; padding: 1px 4px; border-radius: 4px; }
+.sv-status { margin-top: 4px; font-size: 13px; color: var(--ink-3); }
+.sv-good { color: var(--good); font-weight: 620; }
+.sv-bad { color: var(--watch); font-weight: 620; }
+.sv-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.sv-page { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+.sv-sheet { display: flex; justify-content: center; padding: 16px; }
+.sv-canvas-wrap { position: relative; background: #fff; box-shadow: 0 1px 6px rgba(0, 0, 0, .18); }
+.sv-canvas-wrap canvas { display: block; }
+.sv-marks { position: absolute; inset: 0; pointer-events: none; }
+.sv-marks span { position: absolute; background: rgba(255, 214, 0, .45); outline: 2px solid rgba(230, 160, 0, .9); border-radius: 2px; mix-blend-mode: multiply; }
+.sv-fallback { padding: 0 16px; font-size: 13.5px; overflow-wrap: anywhere; }

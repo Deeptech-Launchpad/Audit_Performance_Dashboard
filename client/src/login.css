@@ -1,0 +1,102 @@
+/* Sign-in page: animated audit illustration (left) + form (right). Light and dark both work; motion stops when the computer asks for less motion. */
+.login { height: 100vh; height: 100dvh; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); background: var(--bg); color: var(--ink); }
+
+/* ---------- left: brand panel with the illustration ---------- */
+.login-art { position: relative; overflow: hidden; min-height: 0; display: flex; flex-direction: column; gap: clamp(6px, 2vh, 18px); padding: clamp(14px, 4vh, 36px) clamp(20px, 3.2vw, 44px); color: #fff;
+  background: linear-gradient(145deg, #150f38 0%, #1d1650 48%, #2a2170 100%); }
+.login-grid { position: absolute; inset: 0; pointer-events: none; opacity: .18;
+  background-image: linear-gradient(rgba(255,255,255,.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.35) 1px, transparent 1px); background-size: 38px 38px;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 40%, #000 20%, transparent 75%); mask-image: radial-gradient(ellipse at 50% 40%, #000 20%, transparent 75%); }
+.login-blob { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .55; pointer-events: none; animation: lgBlob 16s ease-in-out infinite; }
+.login-blob.b1 { width: 420px; height: 420px; background: #32c3eb; left: -140px; bottom: -160px; opacity: .42; }
+.login-blob.b2 { width: 360px; height: 360px; background: #b2cd3d; right: -120px; top: -120px; opacity: .3; animation-delay: -8s; }
+.login-brand { position: relative; display: flex; align-items: center; gap: 10px; font-weight: 750; font-size: 17px; letter-spacing: .1px; }
+.login-art .login-brand { gap: 14px; }
+.login-art .login-brand > span:last-child { padding-left: 12px; border-left: 2px solid rgba(255,255,255,.3); font-size: 12.5px; font-weight: 650; }
+.login-art .logo-plate { padding: 5px 9px; border-radius: 9px; }
+.login-art .logo-plate img { width: clamp(80px, 13vh, 108px); }
+.login-copy { position: relative; animation: lgUp .7s cubic-bezier(.2,.8,.2,1) .1s both; }
+.login-copy h2 { margin: clamp(2px, .8vh, 6px) 0 clamp(4px, 1.2vh, 10px); font-size: clamp(16px, min(1.8vw, 3.3vh), 25px); line-height: 1.18; font-weight: 780; letter-spacing: -.4px; }
+.login-copy h2 span { background: linear-gradient(90deg, #32c3eb, #b2cd3d); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.login-copy p { margin: 0; max-width: 470px; font-size: clamp(11.5px, 1.65vh, 13px); line-height: 1.55; color: rgba(255,255,255,.82); }
+/* the picture takes whatever height is left and shrinks with the window (never pushes the page into scrolling) */
+.la { position: relative; width: 100%; max-width: 560px; height: 100%; align-self: center; flex: 1 1 0; min-height: 0; overflow: visible; }
+.login-points { position: relative; list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 12px; color: rgba(255,255,255,.9); }
+.login-points li { display: inline-flex; align-items: center; gap: 8px; animation: lgUp .6s cubic-bezier(.2,.8,.2,1) both; }
+.login-points li:nth-child(2) { animation-delay: .15s; } .login-points li:nth-child(3) { animation-delay: .3s; }
+.login-points span { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,.18); font-size: 11px; }
+
+/* illustration motion */
+.la-float { animation: lgFloat 7s ease-in-out infinite; }
+.la-float2 { animation: lgFloat 8s ease-in-out -3s infinite; }
+.la-bar { transform-box: fill-box; transform-origin: bottom; animation: lgGrow 1s cubic-bezier(.2,.8,.2,1) both; }
+.la-line { stroke-dasharray: 320; stroke-dashoffset: 320; animation: lgDraw 1.6s ease-out .9s forwards; }
+.la-dot { transform-box: fill-box; transform-origin: center; animation: lgPop .4s ease-out 2.4s both, lgPulse 2.2s ease-in-out 2.8s infinite; }
+.la-pop { transform-box: fill-box; transform-origin: center; animation: lgPop .45s cubic-bezier(.3,1.6,.5,1) both; }
+.la-tick { stroke-dasharray: 20; stroke-dashoffset: 20; animation: lgDraw .4s ease-out forwards; }
+.la-bad { animation: lgFlash 1.2s ease-in-out both; }
+.la-lens { animation: lgScan 5.2s ease-in-out infinite; }
+.la-chip { transform-box: fill-box; animation: lgChip .6s cubic-bezier(.2,.8,.2,1) both, lgFloat 6s ease-in-out 1s infinite; }
+.la-spark { transform-box: fill-box; transform-origin: center; animation: lgTwinkle 4s ease-in-out infinite; }
+
+/* ---------- right: the form ---------- */
+.login-side { display: grid; place-items: center; padding: clamp(12px, 3vh, 32px) 24px; position: relative; min-height: 0; overflow-y: auto; }
+.login-card { width: min(350px, 100%); animation: lgUp .6s cubic-bezier(.2,.8,.2,1) .05s both; }
+.login-card.shake { animation: lgShake .45s ease-in-out; }
+.login-card h1 { margin: 0 0 clamp(2px, .8vh, 6px); font-size: clamp(18px, 3vh, 22px); font-weight: 780; letter-spacing: -.4px; }
+.login-sub { margin: 0 0 clamp(10px, 2.6vh, 22px); color: var(--ink-3); font-size: clamp(11.5px, 1.75vh, 12.5px); line-height: 1.45; }
+.login-field { display: block; margin-bottom: clamp(8px, 1.8vh, 14px); }
+.lf-label { display: block; font-size: 12px; font-weight: 650; color: var(--ink-2); margin-bottom: clamp(3px, .7vh, 6px); }
+.lf-box { display: flex; align-items: center; gap: 10px; height: clamp(34px, 5.2vh, 40px); padding: 0 10px 0 12px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface);
+  color: var(--ink-3); transition: border-color .18s, box-shadow .18s, transform .18s; }
+.lf-box:focus-within { border-color: var(--brand); color: var(--brand); box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 16%, transparent); }
+.lf-box input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: transparent; color: var(--ink); font: inherit; font-size: 13px; padding: 0; box-shadow: none; }
+.lf-box input::placeholder { color: var(--ink-3); opacity: .7; }
+/* Chrome paints saved (auto-filled) logins light blue; keep the box one colour */
+.lf-box input:-webkit-autofill, .lf-box input:-webkit-autofill:hover, .lf-box input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 60px var(--surface) inset !important; box-shadow: 0 0 0 60px var(--surface) inset !important; -webkit-text-fill-color: var(--ink); caret-color: var(--ink); transition: background-color 9999s ease-out 0s; }
+.lf-eye { display: grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: 8px; background: transparent; color: var(--ink-3); cursor: pointer; }
+.lf-eye:hover { background: var(--surface-2); color: var(--ink); }
+.lf-eye:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+.login-caps { margin: -6px 0 12px; font-size: 12.5px; font-weight: 650; color: var(--watch); }
+.login-btn { width: 100%; height: clamp(36px, 5.4vh, 42px); margin-top: clamp(2px, .8vh, 6px); justify-content: center; gap: 10px; border-radius: 10px !important; font-size: 13.5px !important; font-weight: 700;
+  background: var(--grad) !important; background-size: 200% 100% !important; border: 0 !important; color: var(--brand-ink) !important;
+  box-shadow: 0 10px 24px -10px rgba(21, 15, 56, .65); transition: filter .2s, transform .15s, box-shadow .2s; }
+.login-btn:hover:not(:disabled) { filter: brightness(1.12); transform: translateY(-1px); box-shadow: 0 14px 28px -10px rgba(21, 15, 56, .75); }
+.login-btn:active:not(:disabled) { transform: translateY(0); }
+.login-btn.ok { background: #1a7f4b !important; color: #fff !important; }
+.login-arrow { display: inline-block; transition: transform .2s; } .login-btn:hover .login-arrow { transform: translateX(4px); }
+.login-spin { width: 16px; height: 16px; border-radius: 50%; border: 2.5px solid color-mix(in srgb, currentColor 35%, transparent); border-top-color: currentColor; animation: lgSpin .7s linear infinite; }
+.login-foot { margin: clamp(8px, 2.2vh, 18px) 0 0; text-align: center; font-size: 11.5px; color: var(--ink-3); }
+
+/* short windows (big browser zoom, small laptops): drop the extras so everything still fits without scrolling */
+@media (max-height: 700px) { .login-points { display: none; } }
+@media (max-height: 560px) { .login-copy p { display: none; } }
+
+/* ---------- small screens: the form first, a slim brand band on top ---------- */
+@media (max-width: 920px) {
+  .login { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .login-art { padding: 22px 20px; gap: 6px; }
+  .login-art .la, .login-points, .login-copy p { display: none; }
+  .login-copy h2 { font-size: 17px; margin: 4px 0 0; }
+  .login-side { align-items: start; padding-top: 28px; }
+}
+
+@keyframes lgUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes lgFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+@keyframes lgGrow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes lgDraw { to { stroke-dashoffset: 0; } }
+@keyframes lgPop { from { opacity: 0; transform: scale(.2); } to { opacity: 1; transform: scale(1); } }
+@keyframes lgPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.35); } }
+@keyframes lgFlash { 0%, 40% { fill: #f5f6fb; } 60%, 100% { fill: #f8e0e0; } }
+@keyframes lgScan { 0% { transform: translate(245px, 200px); } 45% { transform: translate(245px, 324px); } 55% { transform: translate(245px, 324px); } 100% { transform: translate(245px, 200px); } }
+@keyframes lgChip { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
+@keyframes lgTwinkle { 0%, 100% { opacity: .35; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.25); } }
+@keyframes lgBlob { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(40px, -30px) scale(1.12); } }
+@keyframes lgSpin { to { transform: rotate(360deg); } }
+@keyframes lgShake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .login *, .login *::before, .login *::after { animation-duration: .001s !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; transition: none !important; }
+  .la-lens { transform: translate(245px, 284px); }
+}

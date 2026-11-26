@@ -1,0 +1,15 @@
+# installed packages and build output (re-created with npm install / npm run build)
+node_modules/
+client/dist/
+
+# PRIVATE: the live database (audit results, people, users), backups, copies of uploaded audit files and logs
+data/
+
+# local secrets / settings, logs, editor and system files
+.env
+.env.*
+*.log
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

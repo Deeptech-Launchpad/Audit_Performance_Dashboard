@@ -1,0 +1,66 @@
+/* =====================================================================================================
+   COMPANY COLOURS, taken from the AltiusNxt logo. Loaded last, so everything brand-coloured is set here.
+     navy #150F38 · grey #616262 · sky blue #32C3EB · lime #B2CD3D · red #CC3A3A
+   NOT changed on purpose: the good / keep-an-eye / needs-improvement colours and the chart colours of the
+   error types, because those colours carry meaning.
+   ===================================================================================================== */
+:root {
+  --logo-navy: #150f38; --logo-grey: #616262; --logo-sky: #32c3eb; --logo-lime: #b2cd3d; --logo-red: #cc3a3a;
+
+  --bg: #f3f5fa; --surface-2: #f7f8fc; --line: #e1e3ee; --line-2: #ecedf5;
+  --ink: #150f38; --ink-2: #47465f; --ink-3: #6c6d79;
+  --brand: #2a2170; --brand-2: #150f38; --brand-ink: #ffffff; --brand-soft: #e4f5fc; --grid: #e5e7f0;
+  --grad: linear-gradient(135deg, #2f2578, #150f38);
+  --side-bg: linear-gradient(185deg, #150f38 0%, #231a5a 100%); --side-ink: #d2cfee; --side-ink-2: #9d99c2; --side-active: rgba(50, 195, 235, .18);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0e0c1e; --surface: #18152e; --surface-2: #201d3a; --line: #302c51; --line-2: #272342;
+    --ink: #eceaf7; --ink-2: #bdbad8; --ink-3: #928fb1;
+    --brand: #32c3eb; --brand-2: #5fd3f2; --brand-ink: #150f38; --brand-soft: #142f49; --grid: #2c2849;
+    --grad: linear-gradient(135deg, #5fd3f2, #32c3eb);
+    --side-bg: linear-gradient(185deg, #0a0819 0%, #150f38 100%);
+  }
+}
+:root[data-theme='dark'] {
+  --bg: #0e0c1e; --surface: #18152e; --surface-2: #201d3a; --line: #302c51; --line-2: #272342;
+  --ink: #eceaf7; --ink-2: #bdbad8; --ink-3: #928fb1;
+  --brand: #32c3eb; --brand-2: #5fd3f2; --brand-ink: #150f38; --brand-soft: #142f49; --grid: #2c2849;
+  --grad: linear-gradient(135deg, #5fd3f2, #32c3eb);
+  --side-bg: linear-gradient(185deg, #0a0819 0%, #150f38 100%);
+}
+
+/* the logo: white plate in the light theme; the light-coloured copy without a plate in the dark theme */
+.logo-plate { display: inline-flex; align-items: center; justify-content: center; background: #fff; border-radius: 12px; padding: 7px 12px; line-height: 0; transition: background .2s; }
+.logo-plate .logo-d { display: none; }
+:root[data-theme='dark'] .logo-plate { background: transparent; box-shadow: none; }
+:root[data-theme='dark'] .logo-plate .logo-l { display: none; } :root[data-theme='dark'] .logo-plate .logo-d { display: block; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .logo-plate { background: transparent; box-shadow: none; }
+  :root:not([data-theme='light']) .logo-plate .logo-l { display: none; } :root:not([data-theme='light']) .logo-plate .logo-d { display: block; }
+}
+.logo-plate img { display: block; width: 150px; height: auto; }
+.login-art .logo-plate { background: transparent; padding-left: 0; }
+.login-art .logo-plate .logo-l { display: none; } .login-art .logo-plate .logo-d { display: block; }
+.side .brand { flex-direction: column; align-items: stretch; gap: 8px; padding: 0 4px 12px; }
+.side .brand .logo-plate img { width: 100%; max-width: 160px; }
+.brand-app { display: block; text-align: center; font-size: 13px; font-weight: 650; letter-spacing: .04em; color: var(--side-ink); }
+.brand-app::after { content: ''; display: block; height: 3px; margin: 8px auto 0; width: 76px; border-radius: 99px;
+  background: linear-gradient(90deg, var(--logo-lime) 0 33%, var(--logo-sky) 33% 67%, var(--logo-red) 67% 100%); }
+.topbar .logo-plate { padding: 4px 8px; border-radius: 8px; }
+.topbar .logo-plate img { width: 88px; }
+
+/* places that had their own fixed colours */
+.nav a.active { box-shadow: inset 3px 0 0 var(--logo-sky); }
+.side .theme button.on { color: var(--logo-navy); }
+.btn.primary { background: var(--grad); color: var(--brand-ink); box-shadow: 0 6px 18px rgba(21, 15, 56, .28); }
+.btn.primary:hover { box-shadow: 0 8px 22px rgba(21, 15, 56, .38); }
+.kpi::before, .stat::before { background: linear-gradient(90deg, var(--logo-navy), var(--logo-sky)); }
+.kpi.tone-good::before, .stat.tone-good::before { background: var(--good); }
+.kpi.tone-watch::before, .stat.tone-watch::before { background: var(--watch); }
+.kpi.tone-improve::before, .stat.tone-improve::before { background: var(--improve); }
+.champ-fab.is-open { background: linear-gradient(135deg, #2f2578, #150f38); box-shadow: 0 10px 26px rgba(21, 15, 56, .5); }
+.champ-product { background: linear-gradient(135deg, #150f38, #342a86); }
+.champ-audit { background: linear-gradient(135deg, #0b5f7a, #1d86a6); }
+.auth { background: radial-gradient(1100px 560px at 8% -10%, color-mix(in srgb, var(--logo-sky) 22%, var(--bg)) 0, transparent 62%), radial-gradient(900px 520px at 108% 110%, color-mix(in srgb, var(--logo-lime) 20%, var(--bg)) 0, transparent 58%), var(--bg); }
+.auth::before { background: var(--logo-sky); } .auth::after { background: var(--logo-lime); }

@@ -1,0 +1,102 @@
+/* =====================================================================================================
+   SMALLER LOGO AND TEXT (user's request, 2026-11-26). The dashboard is used on a screen with about
+   1270 x 585 of usable space, so the side menu must fit without scrolling. Sizes only: no colours, no layout changes.
+   Loaded after the other style files. Delete this file's import in main.jsx to get the larger sizes back.
+   ===================================================================================================== */
+:root { --side: 200px; }
+body { font-size: 13px; }
+
+/* side menu */
+.side { padding: 10px 9px; gap: 2px; }
+.side .brand { gap: 5px; padding: 0 3px 6px; }
+.side .brand .logo-plate { padding: 5px 8px; border-radius: 8px; }
+.side .brand .logo-plate img { max-width: 104px; }
+.brand-app { font-size: 11.5px; }
+.brand-app::after { height: 2px; margin-top: 4px; width: 54px; }
+.nav a { gap: 8px; padding: 5px 8px; font-size: 12.5px; line-height: 1.45; }
+.nav svg { width: 15px; height: 15px; }
+.side-foot { padding: 7px 5px 0; font-size: 11.5px; line-height: 1.35; }
+.side .theme { margin-bottom: 6px; }
+.side .theme button { padding: 2px 4px; font-size: 11.5px; }
+.side-foot .btn.small { margin-top: 5px; min-height: 24px; padding: 1px 9px; font-size: 11.5px; }
+.topbar .logo-plate img { width: 72px; }
+
+/* page */
+.main { padding: 12px 22px 36px; }
+.searchbar { margin: 0 0 8px; }
+.search input[type=search] { min-height: 30px; padding: 5px 0; font-size: 12.5px; }
+.page-head { margin-bottom: 9px; }
+.page-head h1 { font-size: 19px; }
+.page-head p { font-size: 12.5px; }
+.filters { gap: 8px; padding: 8px 12px; margin-bottom: 11px; }
+.field > label { font-size: 11px; }
+:where(.app) :where(select, input[type=text], input[type=date], input[type=password], input[type=number], input[type=search], textarea) { min-height: 29px; padding: 4px 8px; font-size: 12.5px; }
+.group-h { font-size: 13px; }
+
+/* cards, buttons, tables */
+.card-h { padding: 11px 14px 0; }
+.card-h h3 { font-size: 13px; }
+.card-b { padding: 10px 14px 13px; }
+.kpi { padding: 10px 13px; }
+.kpi .lbl { font-size: 12px; }
+.kpi .val { font-size: 22px; margin-top: 2px; }
+.kpi .sub { font-size: 11.5px; }
+.btn { min-height: 29px; padding: 4px 11px; }
+.btn.small { min-height: 25px; padding: 2px 9px; font-size: 12px; }
+.badge { font-size: 11.5px; }
+.tbl th { font-size: 11.5px; padding: 6px 8px; }
+.tbl td { padding: 7px 8px; }
+.tabs button { padding: 7px 12px; }
+
+/* Overview */
+.hero { gap: 26px; padding: 17px 24px; border-radius: 14px; }
+.hero-main { gap: 7px; }
+.hero-eyebrow { font-size: 11px; }
+.hero-title { font-size: 20px; }
+.hero-sentence { font-size: 13px; }
+.hero-fig { gap: 4px; }
+.hero-fig-lbl { font-size: 12px; }
+.hero-num { font-size: 44px; margin: 0; }
+.hero-target { font-size: 12px; }
+.ov-bar { margin: 13px 0 9px; }
+.seg button { padding: 4px 12px; font-size: 12px; }
+.stat-grid { gap: 10px; }
+.stat { gap: 2px; padding: 11px 14px 10px; border-radius: 12px; }
+.stat-lbl { font-size: 12px; }
+.stat-val { font-size: 26px; }
+.stat-val.is-text { font-size: 17px; }
+.stat-sub { font-size: 11.5px; }
+.ov-main { margin-top: 13px; }
+.lr { padding: 9px 0; }
+.lr-val { font-size: 15px; }
+
+/* Category Performance */
+.cat-card h3 { font-size: 14.5px; }
+.cat-rate b { font-size: 18px; }
+
+/* champion button and pop-up */
+.champ-root { right: 18px; bottom: 18px; gap: 8px; }
+.champ-fab { width: 48px; height: 48px; }
+.champ-fab > svg { width: 23px; height: 23px; }
+.champ-pop { width: min(350px, calc(100vw - 32px)); max-height: calc(100vh - 84px); padding: 11px 12px; border-radius: 16px; }
+.champ-head { margin-bottom: 6px; }
+.champ-title { font-size: 14px; }
+.champ-sub { font-size: 11.5px; }
+.champ-x { width: 26px; height: 26px; font-size: 17px; }
+.champ-week { margin-bottom: 7px; font-size: 11.5px; }
+.champ-week select { min-height: 26px; padding: 2px 6px; }
+.champ-card { padding: 8px 11px; margin-bottom: 7px; border-radius: 12px; }
+.champ-card-top { margin-bottom: 4px; }
+.champ-chip { font-size: 9.5px; padding: 2px 8px; }
+.champ-ribbon { font-size: 10.5px; padding: 2px 8px; }
+.champ-row { gap: 10px; }
+.champ-avatar { width: 42px; height: 42px; font-size: 15px; border-width: 2px; }
+.champ-star { width: 18px; height: 18px; }
+.champ-star svg { width: 10px; height: 10px; }
+.champ-name { font-size: 14.5px; }
+.champ-stat { margin: 0 0 1px; }
+.champ-stat b { font-size: 18px; }
+.champ-stat span { font-size: 11.5px; }
+.champ-line { font-size: 11px; line-height: 1.35; }
+.champ-next { margin-top: 5px; padding-top: 4px; font-size: 11px; }
+.champ-note { font-size: 10.5px; line-height: 1.35; }
