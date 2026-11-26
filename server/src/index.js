@@ -22,4 +22,4 @@ async function tick() {
 }
 if (config.schedulerEnabled) { setTimeout(tick, 5000); setInterval(tick, 15 * 60 * 1000).unref(); }
 
-app.listen(config.port, () => console.log(`Audit Performance Platform running at http://localhost:${config.port}`));
+app.listen(config.port, config.host, () => console.log(`Audit Performance Platform running at http://${config.host || 'localhost'}:${config.port}`));

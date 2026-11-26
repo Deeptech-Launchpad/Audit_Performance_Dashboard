@@ -14,6 +14,7 @@ import { categoriesRouter } from './routes/categories.js';
 export function createApp(db) {
   const app = express();
   app.disable('x-powered-by');
+  if (config.trustProxy) app.set('trust proxy', 'loopback'); // only a proxy on this same machine is trusted
   app.use((req, res, next) => {
     res.set({
       'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'DENY', 'Referrer-Policy': 'same-origin',
