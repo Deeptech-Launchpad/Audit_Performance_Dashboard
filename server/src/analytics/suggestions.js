@@ -38,8 +38,8 @@ const RULES = [
   },
   // 4. members above target
   ({ cur, errTypes, s }) => contentTeam(cur.recs, errTypes, s).filter((m) => m.level === 'improve').slice(0, 5).map((m) => ({
-    id: `improve-${m.id}`, severity: 'high', title: `${m.name} needs improvement (${f1(m.errorRate)} error rate)`,
-    detail: `${m.errorSkus} of ${m.samples} audited SKUs had errors; target is ${s.errorTargetPct}% or lower. Most common: ${m.topTypes.map((t) => t.name).join(', ') || '—'}.`,
+    id: `improve-${m.id}`, severity: 'high', title: `${m.name} has a high error rate (${f1(m.errorRate)})`,
+    detail: `${m.errorSkus} of ${m.samples} audited SKUs had errors; the set error rate is ${s.errorTargetPct}% or lower. Most common: ${m.topTypes.map((t) => t.name).join(', ') || '—'}.`,
     action: `Coaching on ${m.topTypes[0]?.name || 'the most common errors'}${m.topAttributes[0] ? `, especially "${m.topAttributes[0].attribute}"` : ''}.`, evidence: { person: m.name, errorRate: m.errorRate, samples: m.samples } })),
   // 5. person got worse week-on-week
   ({ cur, errTypes, s }) => contentTeam(cur.recs, errTypes, s).filter((m) => m.change && m.change.diff >= 15 && m.samples >= s.minSample).slice(0, 3).map((m) => ({

@@ -77,7 +77,7 @@ export function ErrorTrend({ data, target, height = 250 }) {
         <CartesianGrid vertical={false} />
         <XAxis dataKey="label" tickLine={false} axisLine={false} padding={{ left: 26, right: 26 }} />
         <YAxis tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`} width={44} domain={[0, yMax]} />
-        <ReferenceLine y={target} stroke="var(--ink-3)" strokeDasharray="5 4" label={{ value: `Target ${target}%`, position: 'insideTopRight', fontSize: 11, fill: 'var(--ink-3)' }} />
+        <ReferenceLine y={target} stroke="var(--ink-3)" strokeDasharray="5 4" label={{ value: `Error rate ${target}%`, position: 'insideTopRight', fontSize: 11, fill: 'var(--ink-3)' }} />
         <Tooltip content={<Tip fmt={(v) => `${v}%`} />} />
         <Area isAnimationActive={ANIMATE} animationDuration={900} type="monotone" dataKey="errorRate" name="Error %" stroke="var(--c1)" strokeWidth={2.5} fill="url(#ov-area)" connectNulls
           dot={{ r: 4.5, strokeWidth: 2, stroke: 'var(--surface)', fill: 'var(--c1)' }} activeDot={{ r: 7, strokeWidth: 2, stroke: 'var(--surface)' }} />

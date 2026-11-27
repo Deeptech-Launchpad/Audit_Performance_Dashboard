@@ -1,5 +1,5 @@
 // Admin: send one personal email to everyone in a group at once.
-//   achieved = appreciation to everyone at or under the error target;  improve = feedback to everyone who needs improvement.
+//   achieved = appreciation to everyone with the lowest error rate;  improve = feedback to everyone with a high error rate.
 // Each person gets THEIR OWN message and PDF report (the same as the Feedback window), never one shared text.
 import { useEffect, useState } from 'react';
 import { api, useApi } from '../lib/api.js';
@@ -7,8 +7,8 @@ import { pct } from '../lib/format.js';
 import { Alert, Async, Modal } from './ui.jsx';
 
 const GROUP = {
-  achieved: { title: '🎉 Appreciation email – target achieved', intro: 'Everyone at or under the error target gets a personal congratulations email with their own results and their PDF report.' },
-  improve: { title: '✉ Feedback email – needs improvement', intro: 'Everyone who needs improvement gets their personal feedback email: their numbers, what to work on and the SKUs to check, with their PDF report.' },
+  achieved: { title: '🎉 Appreciation email – lowest error rate', intro: 'Everyone with the lowest error rate gets a personal congratulations email with their own results and their PDF report.' },
+  improve: { title: '✉ Feedback email – high error rate', intro: 'Everyone with a high error rate gets their personal feedback email: their numbers, what to work on and the SKUs to check, with their PDF report.' },
 };
 const okEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || '').trim());
 

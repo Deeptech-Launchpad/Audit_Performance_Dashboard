@@ -17,8 +17,8 @@ export function attachUser(db) {
     const token = readCookie(req, COOKIE);
     req.user = null;
     if (token) {
-      const row = await db.get(`SELECT u.id, u.username, u.display_name, u.role, u.active, s.expires_at FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ?`, [sha256(token)]);
-      if (row && row.active && row.expires_at > iso(new Date())) req.user = { id: row.id, username: row.username, name: row.display_name, role: row.role };
+      const row = await db.get(`SELECT u.id, u.username, u.display_name, u.role, u.active, u.is_developer, s.expires_at FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ?`, [sha256(token)]);
+      if (row && row.active && row.expires_at > iso(new Date())) req.user = { id: row.id, username: row.username, name: row.display_name, role: row.role, developer: !!Number(row.is_developer) };
     }
     next();
   });
@@ -44,7 +44,7 @@ export async function startSession(db, res, userId) {
   await db.run('INSERT INTO sessions (token_hash, user_id, created_at, expires_at) VALUES (?,?,?,?)', [sha256(token), userId, iso(now), iso(exp)]);
   res.cookie(COOKIE, token, { httpOnly: true, sameSite: 'strict', secure: config.cookieSecure, path: '/', expires: exp });
 }
-export const publicUser = (u) => ({ id: u.id, username: u.username, name: u.name, role: u.role, roleLabel: ROLES[u.role] });
+export const publicUser = (u) => ({ id: u.id, username: u.username, name: u.name, role: u.role, roleLabel: ROLES[u.role], developer: !!u.developer });
 
 export function authRouter(db) {
   const r = Router();

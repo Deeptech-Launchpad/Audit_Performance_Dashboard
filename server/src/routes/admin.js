@@ -36,8 +36,8 @@ export function adminRouter(db) {
 
   /* ---- users (Admin) ---- */
   r.get('/users', need('users'), wrap(async (req, res) => {
-    const rows = await db.all('SELECT id, username, display_name, role, active, created_at FROM users ORDER BY username');
-    res.json(rows.map((u) => ({ id: u.id, username: u.username, name: u.display_name, role: u.role, roleLabel: ROLES[u.role], active: !!u.active, createdAt: u.created_at })));
+    const rows = await db.all('SELECT id, username, display_name, role, active, is_developer, created_at FROM users ORDER BY username');
+    res.json(rows.map((u) => ({ id: u.id, username: u.username, name: u.display_name, role: u.role, roleLabel: ROLES[u.role], active: !!u.active, developer: !!Number(u.is_developer), createdAt: u.created_at })));
   }));
   r.post('/users', need('users'), wrap(async (req, res) => {
     const b = z.object({ username: z.string().trim().min(3).max(50).regex(/^[a-zA-Z0-9._-]+$/), name: z.string().trim().min(1).max(100), role, password: pw }).parse(req.body);
@@ -46,7 +46,7 @@ export function adminRouter(db) {
     res.status(201).json({ id });
   }));
   r.patch('/users/:id(\\d+)', need('users'), wrap(async (req, res) => {
-    const b = z.object({ name: z.string().trim().min(1).max(100).optional(), role: role.optional(), active: z.boolean().optional(), password: pw.optional() }).parse(req.body);
+    const b = z.object({ name: z.string().trim().min(1).max(100).optional(), role: role.optional(), active: z.boolean().optional(), developer: z.boolean().optional(), password: pw.optional() }).parse(req.body);
     const u = await db.get('SELECT * FROM users WHERE id = ?', [req.params.id]);
     if (!u) throw new HttpError(404, 'User not found.');
     const newRole = b.role ?? u.role; const newActive = b.active ?? !!u.active;
@@ -55,6 +55,7 @@ export function adminRouter(db) {
       if (!n.n) throw new HttpError(400, 'There must always be at least one active Admin.');
     }
     await db.run('UPDATE users SET display_name=?, role=?, active=? WHERE id=?', [b.name ?? u.display_name, newRole, newActive ? 1 : 0, u.id]);
+    if (b.developer !== undefined) await db.run('UPDATE users SET is_developer=? WHERE id=?', [b.developer ? 1 : 0, u.id]);
     if (b.password) await db.run('UPDATE users SET password_hash=? WHERE id=?', [await hashPassword(b.password), u.id]);
     if (!newActive || b.password) await db.run('DELETE FROM sessions WHERE user_id = ?', [u.id]);
     res.json({ ok: true });

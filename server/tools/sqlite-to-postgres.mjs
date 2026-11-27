@@ -19,9 +19,9 @@ const url = config.databaseUrl || (config.pgliteDir ? await (await import('../sr
 if (!url) { console.error('Set DATABASE_URL (or PGLITE_DIR) to the PostgreSQL database first.'); process.exit(1); }
 
 // parents before children (foreign keys)
-const ORDER = ['users', 'sessions', 'employees', 'employee_roles', 'uploads', 'skus', 'audit_records', 'error_classifications', 'record_attributes', 'pt_tracking', 'reaudit_tracking', 'error_types', 'settings', 'weekly_reports'];
+const ORDER = ['users', 'sessions', 'employees', 'employee_roles', 'uploads', 'skus', 'audit_records', 'error_classifications', 'record_attributes', 'pt_tracking', 'reaudit_tracking', 'error_types', 'settings', 'weekly_reports', 'notes'];
 const UPSERT = { error_types: 'code', settings: 'key' };      // the app may already have filled these with its defaults
-const IDENTITY = ['users', 'employees', 'uploads', 'audit_records', 'error_classifications', 'weekly_reports'];
+const IDENTITY = ['users', 'employees', 'uploads', 'audit_records', 'error_classifications', 'weekly_reports', 'notes'];
 
 const lite = new DatabaseSync(file, { readOnly: true });
 const liteTables = new Set(lite.prepare(`SELECT name FROM sqlite_master WHERE type = 'table'`).all().map((r) => r.name));

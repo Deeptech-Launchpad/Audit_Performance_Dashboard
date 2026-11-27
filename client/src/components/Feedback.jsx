@@ -38,7 +38,7 @@ export default function FeedbackDrawer({ member, params, onClose }) {
           <div className="row gap-s mb"><LevelBadge level={d.member.level} />{d.member.rank && <span className="muted">Rank {d.member.rank}</span>}</div>
           <div className="grid g-kpi mb">
             <Kpi label="SKUs audited" value={d.member.samples} />
-            <Kpi label="SKUs with errors" value={d.member.errorSkus} sub={`Error % ${pct(d.member.errorRate)}`} tone={d.member.level === 'improve' ? 'improve' : d.member.level === 'good' ? 'good' : undefined} info={`Target: ${d.target}% or lower`} />
+            <Kpi label="SKUs with errors" value={d.member.errorSkus} sub={`Error % ${pct(d.member.errorRate)}`} tone={d.member.level === 'improve' ? 'improve' : d.member.level === 'good' ? 'good' : undefined} info={`Lowest error rate: ${d.target}% or lower`} />
             <Kpi label="Error classifications" value={d.member.classifications} info="Each mistake recorded on a SKU is one classification. One SKU can have several, so this can be higher than the number of SKUs with errors." />
           </div>
           <div className="grid g-kpi mb">
@@ -64,7 +64,7 @@ export default function FeedbackDrawer({ member, params, onClose }) {
             ) : <div className="empty">No SKUs with errors.</div>}
           </Card>
 
-          {d.kind === 'appreciation' && <div className="mb"><Alert kind="ok"><b>{member.name} achieved the target.</b> The message below is a thank-you and congratulations note with their own results.</Alert></div>}
+          {d.kind === 'appreciation' && <div className="mb"><Alert kind="ok"><b>{member.name} has the lowest error rate.</b> The message below is a thank-you and congratulations note with their own results.</Alert></div>}
           <Card title={d.kind === 'appreciation' ? 'Appreciation message' : 'Message'} info="Edit it if you like. The same text is used when you send it or copy it.">
             {note && <div className={`alert ${note.kind === 'ok' ? 'ok' : note.kind === 'warn' ? 'warn' : 'error'} mb`} role="status"><div>{note.text}</div></div>}
             <textarea rows={14} value={msg} onChange={(e) => setMsg(e.target.value)} aria-label="Feedback message" style={{ fontFamily: 'inherit' }} />

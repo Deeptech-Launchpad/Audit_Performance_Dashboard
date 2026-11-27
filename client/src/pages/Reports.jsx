@@ -34,7 +34,7 @@ function Glance({ r }) {
     <div className="rep-glance mb">
       <p className="rep-say">
         In {kindWord(kindOf(r))}, <b>{num(o.samples)}</b> SKUs were audited and <b>{num(o.errorSkus)}</b> had errors – an error rate of <b>{pct(o.errorRate)}</b>
-        {o.errorRate != null && <> ({o.errorRate <= r.target ? 'on' : 'above'} the {r.target}% target)</>}.
+        {o.errorRate != null && <> ({o.errorRate <= r.target ? 'within' : 'above'} the {r.target}% error rate)</>}.
         {better && better !== 'the same' && <> That is <b className={better === 'better' ? 'rep-good' : 'rep-bad'}>{Math.abs(c.errorRate)} points {better}</b> than {prevWord}.</>}
         {better === 'the same' && <> The same as {prevWord}.</>}
         {r.afterReaudit && <span className="muted"> Only errors confirmed by the re-audit are counted.</span>}
@@ -87,7 +87,7 @@ function ReportView({ id, canDelete, onDeleted }) {
               <div className="row gap-s"><span className={`badge ${KIND[kindOf(r)]?.[1] || 'few'}`}>{KIND[kindOf(r)]?.[0] || 'Report'} report</span>
                 {r.kind === 'file' && <span className="muted small">audit dates {range(r.period.from, r.period.to)}</span>}</div>
               <h2 className="rep-title">{titleOf(r)}</h2>
-              <div className="muted small">Compared with {r.kind === 'file' ? r.previous.label : range(r.previous.from, r.previous.to)} · created {dateTime(r.generatedAt)} · error target {r.target}% or lower</div>
+              <div className="muted small">Compared with {r.kind === 'file' ? r.previous.label : range(r.previous.from, r.previous.to)} · created {dateTime(r.generatedAt)} · error rate {r.target}% or lower</div>
             </div>
             <div className="row gap-s rep-actions">
               <button className="btn primary" onClick={() => get('pdf')} disabled={!!busy}><Icon name="download" /> {busy === 'pdf' ? 'Preparing…' : 'PDF'}</button>

@@ -1,0 +1,26 @@
+/* Feedback board */
+.note-list { display: flex; flex-direction: column; gap: 12px; }
+.note-list .note-card { padding: 14px 16px; border-left: 4px solid var(--brand); border-radius: 10px; }
+.note-list .note-card.st-in_progress { border-left-color: var(--watch); }
+.note-list .note-card.st-done { border-left-color: var(--good); }
+.note-list .note-card.st-wont_do { border-left-color: var(--few); opacity: .85; }
+.note-top { display: flex; gap: 12px; align-items: flex-start; }
+.note-kind { font-size: 22px; line-height: 1; padding-top: 2px; }
+.note-title { font-size: 15px; font-weight: 650; margin: 0 0 2px; overflow-wrap: anywhere; }
+.note-badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.note-details.main { color: var(--ink); font-size: 14.5px; }
+.badge.plain { background: var(--surface-2); color: var(--ink-2); }
+.note-details { margin: 10px 0 0 34px; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--ink-2); }
+.note-reply { margin: 10px 0 0 34px; padding: 8px 12px; border-radius: 8px; background: var(--brand-soft); white-space: pre-wrap; overflow-wrap: anywhere; }
+.note-card.st-done .note-reply { background: var(--good-bg); }
+.note-actions, .respond { margin: 10px 0 0 34px; }
+.respond textarea { margin-top: 4px; }
+.note-form { display: flex; flex-direction: column; gap: 12px; min-width: min(560px, 80vw); }
+.kind-pick { display: flex; gap: 8px; flex-wrap: wrap; }
+.kind-pick button { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 6px 14px; cursor: pointer; font-weight: 550; }
+.kind-pick button.on { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); }
+.nav-count { margin-left: auto; background: var(--logo-sky, #4aa3df); color: #fff; border-radius: 999px; font-size: 11px; font-weight: 700; padding: 0 7px; line-height: 18px; }
+@media (max-width: 640px) {
+  .note-top { flex-wrap: wrap; } .note-badges { width: 100%; justify-content: flex-start; }
+  .note-details, .note-reply, .note-actions, .respond { margin-left: 0; }
+}

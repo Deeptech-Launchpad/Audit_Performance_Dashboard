@@ -160,7 +160,7 @@ export function reportToExcel(r) {
   add('Suggestions', [['Priority', 'Suggestion', 'Evidence', 'What to do'], ...r.suggestions.map((s) => [SEV[s.severity], s.title, s.detail, s.action])], [12, 60, 80, 60]);
   return addLogoToXlsx(XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }));
 }
-export const LEVEL = { good: 'Achieved target', watch: 'Keep an eye on', improve: 'Needs improvement', few: 'Too few samples', none: 'No audited samples' };
+export const LEVEL = { good: 'Lowest error rate', watch: 'Moderate error rate', improve: 'High error rate', few: 'Too few samples', none: 'No audited samples' };
 const SEV = { high: 'Important', medium: 'Worth doing', low: 'For information', good: 'Good news' };
 
 /* ------------------------------------------------------------------ PDF */
@@ -188,7 +188,7 @@ export function reportToPdf(r) {
   const logo = logoPng(); if (logo) doc.image(logo, 40 + W - 100, 36, { width: 100 }); // top right; does not move the text
   doc.font('Helvetica-Bold').fontSize(19).fillColor(INK).text('Audit Performance Report');
   para(`${reportTitle(r)}  |  compared with ${r.previous.label}`, { color: MUTE, width: W - 110 });
-  para(`Created ${r.generatedAt.slice(0, 16).replace('T', ' ')} UTC  |  Error target: ${r.target}% or lower`, { color: MUTE, size: 8.5 });
+  para(`Created ${r.generatedAt.slice(0, 16).replace('T', ' ')} UTC  |  Error rate: ${r.target}% or lower`, { color: MUTE, size: 8.5 });
 
   h1('1. Overall team performance');
   table([{ h: 'Measure', w: 5 }, { h: 'This period', w: 2, align: 'right' }, { h: 'Previous', w: 2, align: 'right' }, { h: 'Change', w: 2, align: 'right' }], [

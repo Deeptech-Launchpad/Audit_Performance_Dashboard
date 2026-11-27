@@ -10,6 +10,7 @@ import { reportsRouter } from './routes/reports.js';
 import { adminRouter } from './routes/admin.js';
 import { feedbackRouter } from './routes/feedback.js';
 import { categoriesRouter } from './routes/categories.js';
+import { notesRouter } from './routes/notes.js';
 
 export function createApp(db) {
   const app = express();
@@ -37,6 +38,7 @@ export function createApp(db) {
   app.use('/api/reports', reportsRouter(db));
   app.use('/api/feedback', feedbackRouter(db));
   app.use('/api/categories', categoriesRouter(db));
+  app.use('/api/notes', notesRouter(db));
   app.use('/api', adminRouter(db));
   app.use('/api', (req, res, next) => next(new HttpError(404, 'Not found')));
 

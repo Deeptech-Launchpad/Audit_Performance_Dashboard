@@ -10,7 +10,7 @@ import { DatabaseSync } from 'node:sqlite';
 const [file, flag] = process.argv.slice(2);
 if (!file || !fs.existsSync(file)) { console.error('Give the database file, e.g. data/audit.db'); process.exit(1); }
 const CLEAR = ['weekly_reports', 'reaudit_tracking', 'pt_tracking', 'record_attributes', 'error_classifications', 'audit_records', 'skus', 'uploads', 'employee_roles', 'employees']; // children first
-const KEEP = ['users', 'sessions', 'settings', 'error_types'];
+const KEEP = ['users', 'sessions', 'settings', 'error_types', 'notes'];
 const db = new DatabaseSync(file);
 const have = new Set(db.prepare(`SELECT name FROM sqlite_master WHERE type = 'table'`).all().map((r) => r.name));
 const count = (t) => (have.has(t) ? db.prepare(`SELECT COUNT(*) AS n FROM ${t}`).get().n : '-');

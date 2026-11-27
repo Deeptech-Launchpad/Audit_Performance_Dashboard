@@ -8,7 +8,7 @@ import { fmtRange, fmtDate } from '../lib/dates.js';
 import { bad } from '../lib/http.js';
 import { logoPng } from './reportLogo.js';
 
-const LEVEL = { good: 'Achieved target', watch: 'Slightly above target', improve: 'Needs improvement', few: 'Too few audited SKUs to judge', none: 'No audited SKUs' };
+const LEVEL = { good: 'Lowest error rate', watch: 'Moderate error rate', improve: 'High error rate', few: 'Too few audited SKUs to judge', none: 'No audited SKUs' };
 const sev = { high: 0, medium: 1, low: 2, good: 3 };
 const f1 = (x) => (x == null ? '—' : `${Math.round(x * 100) / 100}%`);
 const cut = (t, n) => { const s = String(t || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n - 1) + '…' : s; };
@@ -20,10 +20,10 @@ export function personSuggestions(m, recs, errTypes, s) {
   const errRecs = recs.filter((r) => r.sampled && r.errs.length);
 
   if (m.level === 'improve' || m.level === 'watch') {
-    push({ id: 'status', severity: m.level === 'improve' ? 'high' : 'medium', title: `Your error rate is ${f1(m.errorRate)} – the target is ${s.errorTargetPct}% or lower`,
+    push({ id: 'status', severity: m.level === 'improve' ? 'high' : 'medium', title: `Your error rate is ${f1(m.errorRate)} – the set error rate is ${s.errorTargetPct}% or lower`,
       detail: `${m.errorSkus} of your ${m.samples} audited SKUs had at least one error.`, action: 'Go through the SKUs listed in this report, correct them, and check your other SKUs for the same mistakes before submitting.', evidence: { errorRate: m.errorRate, samples: m.samples, errorSkus: m.errorSkus } });
   } else if (m.level === 'good') {
-    push({ id: 'status', severity: 'good', title: `Your error rate is ${f1(m.errorRate)} – within the ${s.errorTargetPct}% target`, detail: `${m.errorSkus} of ${m.samples} audited SKUs had errors.`, action: 'Keep it up.', evidence: { errorRate: m.errorRate } });
+    push({ id: 'status', severity: 'good', title: `Your error rate is ${f1(m.errorRate)} – within the ${s.errorTargetPct}% error rate`, detail: `${m.errorSkus} of ${m.samples} audited SKUs had errors.`, action: 'Keep it up.', evidence: { errorRate: m.errorRate } });
   } else if (m.level === 'few') {
     push({ id: 'few', severity: 'low', title: `Only ${m.samples} of your SKUs were audited`, detail: `With fewer than ${s.minSample} audited SKUs the percentage can swing a lot, so treat it as an early signal.`, action: 'Use the points below as guidance; more audited SKUs will give a fairer picture.', evidence: { samples: m.samples } });
   }
@@ -67,9 +67,9 @@ function composeAppreciation(fb, sender) {
   const m = fb.member; const L = [];
   const clean = m.errorSkus === 0;
   L.push(`Hi ${m.name},`, '',
-    `Congratulations! 🎉 You achieved your audit target for ${fb.period.label}.`, '',
+    `Congratulations! 🎉 You have the lowest error rate for ${fb.period.label}.`, '',
     clean ? `All ${m.samples} of your SKUs that were audited came through without a single error – an excellent result.`
-      : `Of your ${m.samples} audited SKUs, only ${m.errorSkus} had an error, which is an error rate of ${f1(m.errorRate)} against a target of ${fb.target}% or lower.`,
+      : `Of your ${m.samples} audited SKUs, only ${m.errorSkus} had an error, which is an error rate of ${f1(m.errorRate)} against the set error rate of ${fb.target}% or lower.`,
     ...(m.rank ? [`You are ranked #${m.rank} in the Product Team for this period.`] : []), '',
     'Your results',
     `- SKUs audited: ${m.samples}`, `- SKUs with errors: ${m.errorSkus} (${f1(m.errorRate)})`,
@@ -90,7 +90,7 @@ function composeMessage(fb, sender) {
   if (fb.member.level === 'good') return composeAppreciation(fb, sender);
   const m = fb.member; const L = [];
   L.push(`Hi ${m.name},`, '', `Here is your audit feedback for ${fb.period.label}.`, '', 'Summary',
-    `- SKUs audited: ${m.samples}`, `- SKUs with errors: ${m.errorSkus}${m.errorRate == null ? '' : ` (${f1(m.errorRate)}; target ${fb.target}% or lower)`}`,
+    `- SKUs audited: ${m.samples}`, `- SKUs with errors: ${m.errorSkus}${m.errorRate == null ? '' : ` (${f1(m.errorRate)}; set error rate ${fb.target}% or lower)`}`,
     `- Error classifications: ${m.classifications}`,
     ...(m.attrsAvailable ? [`- Attributes enriched: ${m.attrsEnriched}`, `- Attributes audited: ${m.attrsAudited}`, `- Attributes with errors: ${m.attrErrors}${m.attrErrorRate == null ? '' : ` (${f1(m.attrErrorRate)} of audited attributes)`}`] : [`- Attributes with errors: ${m.attrErrors}`]),
     `- Status: ${LEVEL[m.level]}`, '');
@@ -129,7 +129,7 @@ export async function buildFeedback(db, { builderId, from, to, sender }) {
   };
   fb.message = composeMessage(fb, sender);
   fb.kind = m.level === 'good' ? 'appreciation' : 'feedback';
-  fb.subject = fb.kind === 'appreciation' ? `Congratulations – you achieved your audit target (${period.label})` : `Audit feedback – ${period.label}`;
+  fb.subject = fb.kind === 'appreciation' ? `Congratulations – lowest error rate (${period.label})` : `Audit feedback – ${period.label}`;
   return fb;
 }
 
@@ -153,10 +153,10 @@ export function feedbackToPdf(fb) {
   const p = (t, o = {}) => doc.font(o.bold ? 'Helvetica-Bold' : 'Helvetica').fontSize(o.size || 10).fillColor(o.color || INK).text(t, { width: W, ...o });
   const m = fb.member;
   const logo = logoPng(); if (logo) doc.image(logo, 40 + W - 100, 36, { width: 100 });
-  doc.font('Helvetica-Bold').fontSize(19).fillColor(INK).text(m.level === 'good' ? 'Audit results – target achieved' : 'Audit feedback');
+  doc.font('Helvetica-Bold').fontSize(19).fillColor(INK).text(m.level === 'good' ? 'Audit results – lowest error rate' : 'Audit feedback');
   p(`${m.name}  |  ${fb.period.label}`, { color: MUTE });
   h('Summary');
-  [['SKUs audited', m.samples], ['SKUs with errors', m.errorSkus], ['Error percentage', `${f1(m.errorRate)}  (target ${fb.target}% or lower)`], ['Error classifications', m.classifications],
+  [['SKUs audited', m.samples], ['SKUs with errors', m.errorSkus], ['Error percentage', `${f1(m.errorRate)}  (set error rate ${fb.target}% or lower)`], ['Error classifications', m.classifications],
     ...(m.attrsAvailable ? [['Attributes enriched', m.attrsEnriched], ['Attributes audited', m.attrsAudited], ['Attributes with errors', `${m.attrErrors}${m.attrErrorRate == null ? '' : `  (${f1(m.attrErrorRate)} of audited attributes)`}`]] : [['Attributes with errors', m.attrErrors]]),
     ['Status', m.levelLabel]]
     .forEach(([k, v]) => { doc.font('Helvetica').fontSize(10).fillColor(MUTE).text(k, 40, doc.y, { continued: true, width: 170 }).fillColor(INK).font('Helvetica-Bold').text(`   ${v}`); });

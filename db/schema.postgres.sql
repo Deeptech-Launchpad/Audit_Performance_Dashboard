@@ -161,3 +161,22 @@ ALTER TABLE record_attributes ADD COLUMN IF NOT EXISTS is_attribute BIGINT NOT N
 ALTER TABLE record_attributes ADD COLUMN IF NOT EXISTS was_enriched BIGINT;
 ALTER TABLE audit_records ADD COLUMN IF NOT EXISTS taxonomy TEXT;
 ALTER TABLE audit_records ADD COLUMN IF NOT EXISTS source_info TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_developer BIGINT NOT NULL DEFAULT 0;   -- can answer the Feedback board
+
+-- Feedback board: bugs / feature requests from users to the developer
+CREATE TABLE IF NOT EXISTS notes (
+  id          BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  kind        TEXT NOT NULL DEFAULT 'bug',      -- bug | feature | other
+  title       TEXT NOT NULL,
+  details     TEXT NOT NULL DEFAULT '',
+  page        TEXT NOT NULL DEFAULT '',
+  priority    TEXT NOT NULL DEFAULT 'normal',   -- low | normal | high
+  status      TEXT NOT NULL DEFAULT 'new',      -- new | in_progress | done | wont_do
+  reply       TEXT NOT NULL DEFAULT '',
+  created_by  BIGINT REFERENCES users(id) ON DELETE SET NULL,
+  created_at  TEXT NOT NULL,
+  updated_at  TEXT NOT NULL,
+  done_at     TEXT,
+  done_by     BIGINT REFERENCES users(id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS ix_notes_status ON notes(status);

@@ -18,13 +18,14 @@ import FollowUps from './pages/FollowUps.jsx';
 import Upload from './pages/Upload.jsx';
 import Reports from './pages/Reports.jsx';
 import Settings from './pages/Settings.jsx';
+import Notes from './pages/Notes.jsx';
 const SourceView = lazy(() => import('./pages/SourceView.jsx')); // the source PDF with the value marked (opened in a new tab)
 
 const PERMS = { upload: ['admin', 'manager', 'leader'], undoUpload: ['admin', 'manager'], report: ['admin', 'manager', 'leader'], settings: ['admin'], users: ['admin'] };
 
 const NAV = [
   ['/', 'Overview', 'overview'], ['/content', 'Product Team', 'users'], ['/categories', 'Category Performance', 'table'], ['/audit', 'Audit Team', 'audit'], ['/errors', 'Error Analysis', 'error'],
-  ['/follow-ups', 'PT & Re-Audit', 'clock'], ['/upload', 'Upload Audit Files', 'upload'], ['/reports', 'Weekly Reports', 'report'], ['/settings', 'Settings', 'settings'],
+  ['/follow-ups', 'PT & Re-Audit', 'clock'], ['/upload', 'Upload Audit Files', 'upload'], ['/reports', 'Weekly Reports', 'report'], ['/notes', 'Feedback board', 'note'], ['/settings', 'Settings', 'settings'],
 ];
 
 /** Light / Dark / Auto (follows the computer). Remembered in this browser. */
@@ -42,7 +43,11 @@ function ThemeSwitch() {
 
 function Shell({ user, onLogout }) {
   const meta = useApi('/api/meta'); const [open, setOpen] = useState(false); const loc = useLocation();
+  const board = !!user.developer || user.role === 'manager'; // Feedback board: developer accounts + Audit Managers only
+  const notes = useApi('/api/notes/count', undefined, { skip: !board }); const reloadNotes = notes.reload;
   useEffect(() => setOpen(false), [loc.pathname]);
+  useEffect(() => { window.addEventListener('notes-changed', reloadNotes); return () => window.removeEventListener('notes-changed', reloadNotes); }, [reloadNotes]);
+  useEffect(() => { if (!board) return undefined; const t = setInterval(reloadNotes, 5 * 60 * 1000); return () => clearInterval(t); }, [reloadNotes, board]); // new notes from others show up without a refresh
   if (meta.loading && !meta.data) return <div className="auth"><Loading /></div>;
   if (meta.error) return <div className="auth"><div style={{ maxWidth: 480 }}><ErrorBox error={meta.error} retry={meta.reload} /></div></div>;
   const m = { ...meta.data, reload: meta.reload };
@@ -53,8 +58,8 @@ function Shell({ user, onLogout }) {
           <div className="topbar"><button className="btn small" aria-label="Open menu" onClick={() => setOpen(true)}><Icon name="menu" /></button><Logo /><b>Audit Performance</b></div>
           <nav className={`side ${open ? 'open' : ''}`} aria-label="Main">
             <div className="brand"><Logo /><span className="brand-app">Audit Performance</span></div>
-            <div className="nav">{NAV.map(([to, label, icon]) => (
-              <NavLink key={to} to={{ pathname: to, search: loc.search }} end={to === '/'} className={({ isActive }) => (isActive ? 'active' : '')}><Icon name={icon} />{label}</NavLink>))}</div>
+            <div className="nav">{NAV.filter(([to]) => to !== '/notes' || board).map(([to, label, icon]) => (
+              <NavLink key={to} to={{ pathname: to, search: loc.search }} end={to === '/'} className={({ isActive }) => (isActive ? 'active' : '')}><Icon name={icon} />{label}{to === '/notes' && notes.data?.open > 0 && <span className="nav-count" title={`${notes.data.open} open note(s)`}>{notes.data.open}</span>}</NavLink>))}</div>
             <div className="side-foot">
               <ThemeSwitch />
               <div><b>{user.name}</b></div><div className="muted">{ROLE_LABEL[user.role]}</div>
@@ -66,7 +71,7 @@ function Shell({ user, onLogout }) {
             <div className="page" key={loc.pathname}><Routes>
               <Route path="/" element={<Overview />} /><Route path="/content" element={<ContentTeam />} /><Route path="/categories" element={<Categories />} /><Route path="/audit" element={<AuditTeam />} />
               <Route path="/errors" element={<ErrorAnalysis />} /><Route path="/follow-ups" element={<FollowUps />} /><Route path="/records" element={<Navigate to="/" replace />} />
-              <Route path="/upload" element={<Upload />} /><Route path="/reports" element={<Reports />} /><Route path="/settings" element={<Settings />} />
+              <Route path="/upload" element={<Upload />} /><Route path="/reports" element={<Reports />} /><Route path="/settings" element={<Settings />} />{board && <Route path="/notes" element={<Notes />} />}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes></div>
           </main>

@@ -13,12 +13,33 @@ const Trophy = ({ size = 28 }) => (
 const Star = () => <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.6 1.5 6.8L12 17l-6.1 3.4 1.5-6.8L2.2 9l6.9-.7z" fill="currentColor" /></svg>;
 const initials = (n) => String(n).split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
 const CONFETTI = ['#ffd84d', '#ff7a90', '#5ad1b0', '#7aa2ff', '#c39bff', '#ffa94d'];
+const MEDALS = [['gold', 'Gold', '1st'], ['silver', 'Silver', '2nd'], ['platinum', 'Platinum', '3rd']]; // Product Team top 3, shown one under the other
 
-function Champ({ tone, team, ribbon, p, stat, statLabel, lines, next, empty }) {
+/** Product Team: Gold, Silver and Platinum stacked vertically. */
+function Podium({ people, teamRate }) {
+  return (
+    <ol className="podium">{people.slice(0, 3).map((x, i) => {
+      const [cls, medal, place] = MEDALS[i];
+      const better = teamRate != null && teamRate > x.errorRate ? Math.round((teamRate - x.errorRate) * 10) / 10 : null;
+      return (
+        <li key={x.id ?? x.name} className={`podium-row m-${cls}`} style={{ '--dl': `${i * 120}ms` }}>
+          <span className="podium-medal" title={`${medal} – ${place}`}><span className="podium-place">{i + 1}</span></span>
+          <span className="podium-avatar">{initials(x.name)}</span>
+          <span className="podium-info">
+            <span className="podium-name" title={x.name}>{x.name}</span>
+            <span className="podium-line"><b className="podium-tag">{medal}</b> {x.errorSkus} of {x.samples} audited SKUs had errors{i === 0 && better ? ` · ${better} pts better than the team` : ''}</span>
+          </span>
+          <span className="podium-rate">{pct(x.errorRate)}<small>error rate</small></span>
+        </li>);
+    })}</ol>
+  );
+}
+
+function Champ({ tone, team, ribbon, p, stat, statLabel, lines, next, empty, children }) {
   return (
     <div className={`champ-card champ-${tone}`}>
       <div className="champ-card-top"><span className="champ-chip">{team}</span>{p && <span className="champ-ribbon">{ribbon}</span>}</div>
-      {p ? (
+      {p && children ? children : p ? (
         <div className="champ-row">
           <div className="champ-medal"><span className="champ-avatar">{initials(p.name)}</span><span className="champ-star"><Star /></span></div>
           <div className="champ-info">
@@ -68,15 +89,16 @@ export default function ChampionFab() {
           {d && !d.week && <p className="champ-empty dark">No audit data yet. Upload an audit file first.</p>}
           {d?.week && (
             <>
-              <Champ tone="product" team="Product Team" ribbon="Lowest error rate" p={p} stat={p ? pct(p.errorRate) : ''} statLabel="error rate"
+              <Champ tone="product" team="Product Team" ribbon="Top 3 · lowest error rate" p={p} stat={p ? pct(p.errorRate) : ''} statLabel="error rate"
                 lines={p ? [`${p.errorSkus} of ${p.samples} audited SKUs had errors`, better ? `${better} points better than the team (${pct(d.teamErrorRate)})` : null] : []}
-                next={d.product.length > 1 ? `Next: ${d.product.slice(1).map((x) => `${x.name} ${pct(x.errorRate)}`).join(' · ')}` : null}
-                empty={`Nobody had ${d.minSample} or more audited SKUs this week, so nobody can be ranked fairly.`} />
+                empty={`Nobody had ${d.minSample} or more audited SKUs this week, so nobody can be ranked fairly.`}>
+                <Podium people={d.product} teamRate={d.teamErrorRate} />
+              </Champ>
               <Champ tone="audit" team="Audit Team" ribbon="Most errors found" p={a} stat={a ? num(a.classifications) : ''} statLabel={a?.classifications === 1 ? 'error type found' : 'error types found'}
                 lines={a ? [`found on ${num(a.errorSkus)} of ${num(a.skusAudited)} audited SKUs`, a.cases ? `${a.closedCases} of ${a.cases} follow-up cases closed` : null] : []}
                 next={d.audit.length > 1 ? `Next: ${d.audit.slice(1).map((x) => `${x.name} ${num(x.classifications)}`).join(' · ')}` : null}
                 empty="No auditor recorded an error this week." />
-              <p className="champ-note">Whole team, all projects and files. Product Team: lowest error rate. Audit Team: most error types found. It updates by itself when you upload files with a newer audit date.</p>
+              <p className="champ-note">Whole team, all projects and files. Product Team: top 3 with the lowest error rate – Gold, Silver, Platinum. Audit Team: most error types found. It updates by itself when you upload files with a newer audit date.</p>
             </>
           )}
         </div>

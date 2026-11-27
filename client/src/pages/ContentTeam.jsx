@@ -69,20 +69,20 @@ function Body({ d, params }) {
         <Kpi label="Team error percentage" value={pct(d.team.errorRate)} sub={`${num(d.team.errorSkus)} SKUs with errors`} tone={d.team.errorRate == null ? undefined : d.team.errorRate <= d.target ? 'good' : d.team.errorRate <= d.target + d.watchMargin ? 'watch' : 'improve'} info="SKUs with errors ÷ SKUs audited × 100. A SKU with several errors is counted once." />
         <Kpi label="Attributes audited" value={d.team.attrsAvailable ? num(d.team.attrsAudited) : 'Not available'} sub={d.team.attrsAvailable ? `${num(d.team.attrErrors)} with errors` : undefined} info={NA_ATTR} />
         <Kpi label="Attribute error %" value={d.team.attrsAvailable ? pct(d.team.attrErrorRate) : 'Not available'} info="Attributes with errors ÷ attributes audited × 100." />
-        <Kpi label="Target" value={`${d.target}% or lower`} sub={`Needs improvement above ${d.target + d.watchMargin}%`} info="Set by the Admin in Settings." />
+        <Kpi label="Error rate" value={`${d.target}% or lower`} sub={`High error rate above ${d.target + d.watchMargin}%`} info="Set by the Admin in Settings." />
       </div>
 
       {can('users') && (achieved.length > 0 || improve.length > 0) && (
         <Card className="mb" title="Email the team" info="Admin only. Sends one personal email to each person in the group – their own numbers, message and PDF report – in one go. You can check and change the list before sending.">
           <div className="row">
-            <button className="btn primary" disabled={!achieved.length} onClick={() => setBulk('achieved')}>🎉 Appreciate everyone who achieved the target ({achieved.length})</button>
-            <button className="btn danger" disabled={!improve.length} onClick={() => setBulk('improve')}>✉ Feedback to everyone who needs improvement ({improve.length})</button>
+            <button className="btn primary" disabled={!achieved.length} onClick={() => setBulk('achieved')}>🎉 Appreciate everyone with the lowest error rate ({achieved.length})</button>
+            <button className="btn danger" disabled={!improve.length} onClick={() => setBulk('improve')}>✉ Feedback to everyone with a high error rate ({improve.length})</button>
           </div>
         </Card>
       )}
 
       {improve.length > 0 && (
-        <Card className="mb" title="Needs improvement" info="These people are well above the target error percentage. Open their feedback to see suggestions based on their own errors and send them the report.">
+        <Card className="mb" title="High error rate" info="These people are well above the set error rate. Open their feedback to see suggestions based on their own errors and send them the report.">
           <div className="grid" style={{ gap: 8 }}>{improve.map((m) => (
             <div key={m.id ?? m.name} className="row gap-s">
               <button className="btn small danger" onClick={() => setSel(m)}>▲ {m.name} – {pct(m.errorRate)} <span className="muted">({m.errorSkus} of {m.samples})</span></button>
@@ -102,9 +102,9 @@ function Body({ d, params }) {
         {d.members.some((m) => m.level === 'few') && <p className="muted small" style={{ padding: '0 16px 14px', margin: 0 }}>◔ “Too few samples”: fewer than {d.minSample} SKUs were audited, so the percentage may swing a lot. Treat it as an early signal, not a verdict.</p>}
       </Card>
 
-      <Card title="Error percentage by person" info={`Each bar is SKUs with errors ÷ SKUs audited. Green is at or below the ${d.target}% target, amber is slightly above, red is well above, grey means too few samples.`}>
+      <Card title="Error percentage by person" info={`Each bar is SKUs with errors ÷ SKUs audited. Green is at or below the ${d.target}% error rate (lowest), amber is moderate, red is well above, grey means too few samples.`}>
         {chart.length ? <HBar data={chart} colorOf={(r) => LEVEL_COLOR[r.level]} fmt={(v) => pct(v)} label="Error %" width={150} /> : <div className="empty">No audited SKUs yet.</div>}
-        <div className="legend"><span><i style={{ background: 'var(--good)' }} />Achieved target (≤ {d.target}%)</span><span><i style={{ background: 'var(--watch)' }} />Keep an eye on</span><span><i style={{ background: 'var(--improve)' }} />Needs improvement</span><span><i style={{ background: 'var(--few)' }} />Too few samples</span></div>
+        <div className="legend"><span><i style={{ background: 'var(--good)' }} />Lowest error rate (≤ {d.target}%)</span><span><i style={{ background: 'var(--watch)' }} />Moderate error rate</span><span><i style={{ background: 'var(--improve)' }} />High error rate</span><span><i style={{ background: 'var(--few)' }} />Too few samples</span></div>
       </Card>
 
       {sel && <MemberDrawer m={sel} d={d} params={params} onClose={() => setSel(null)} openRecords={openRecords} onFeedback={() => { const m = sel; setSel(null); setFb(m); }} />}
@@ -159,10 +159,10 @@ function MemberDrawer({ m, d, params, onClose, openRecords, onFeedback }) {
 
       {canList && m.errorSkus > 0 && <SourceChecks member={m} params={params} />}
 
-      <Card title="Week by week" className="mb" info="Error percentage per week. The dashed line is the target.">
+      <Card title="Week by week" className="mb" info="Error percentage per week. The dashed line is the set error rate.">
         {weekly.filter((w) => w.samples > 0).length ? (
           <>
-            <Trend data={weekly} xKey="week" xFmt={weekLabel} lines={[{ key: 'errorRate', name: 'Error %', color: 'var(--c1)' }]} yFmt={(v) => `${v}%`} target={d.target} targetLabel={`Target ${d.target}%`} height={220} />
+            <Trend data={weekly} xKey="week" xFmt={weekLabel} lines={[{ key: 'errorRate', name: 'Error %', color: 'var(--c1)' }]} yFmt={(v) => `${v}%`} target={d.target} targetLabel={`Error rate ${d.target}%`} height={220} />
             <Columns data={weekly} xKey="week" xFmt={weekLabel} height={200} keys={[{ key: 'samples', name: 'Audited SKUs', color: 'var(--c3)' }, { key: 'errorSkus', name: 'SKUs with errors', color: 'var(--c2)' }]} />
           </>
         ) : <div className="empty">No audited SKUs in the selected period.</div>}

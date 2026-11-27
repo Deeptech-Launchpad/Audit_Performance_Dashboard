@@ -18,6 +18,7 @@ export async function openSqlite(file, schemaSql) {
   if (!colsOf('audit_records').includes('source_info')) raw.exec('ALTER TABLE audit_records ADD COLUMN source_info TEXT');
   if (!colsOf('record_attributes').includes('is_attribute')) raw.exec('ALTER TABLE record_attributes ADD COLUMN is_attribute INTEGER NOT NULL DEFAULT 1');
   if (!colsOf('record_attributes').includes('was_enriched')) raw.exec('ALTER TABLE record_attributes ADD COLUMN was_enriched INTEGER');
+  if (!colsOf('users').includes('is_developer')) raw.exec('ALTER TABLE users ADD COLUMN is_developer INTEGER NOT NULL DEFAULT 0');
   if (!cols.includes('project')) raw.exec('ALTER TABLE uploads ADD COLUMN project TEXT');
   if (!cols.includes('has_unsampled')) raw.exec('ALTER TABLE uploads ADD COLUMN has_unsampled INTEGER NOT NULL DEFAULT 1');
   const cache = new Map();

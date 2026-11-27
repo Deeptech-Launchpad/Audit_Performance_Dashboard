@@ -38,8 +38,8 @@ after(() => { server?.close(); delete process.env.MAIL_TEST; });
 
 test('someone who achieved the target gets an appreciation message; someone above it gets feedback', async () => {
   const ann = (await api('GET', `/api/feedback/${await id('Ann')}`)).body;
-  assert.equal(ann.kind, 'appreciation'); assert.match(ann.subject, /Congratulations – you achieved your audit target/);
-  assert.match(ann.message, /Congratulations!/); assert.match(ann.message, /without a single error/); assert.match(ann.message, /Achieved target/);
+  assert.equal(ann.kind, 'appreciation'); assert.match(ann.subject, /Congratulations – lowest error rate/);
+  assert.match(ann.message, /Congratulations!/); assert.match(ann.message, /without a single error/); assert.match(ann.message, /Lowest error rate/);
   const bea = (await api('GET', `/api/feedback/${await id('Bea')}`)).body;
   assert.equal(bea.kind, 'appreciation'); assert.match(bea.message, /only 1 had an error, which is an error rate of 10%/);
   const cy = (await api('GET', `/api/feedback/${await id('Cy')}`)).body;

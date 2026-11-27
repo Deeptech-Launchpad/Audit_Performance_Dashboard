@@ -3,11 +3,11 @@ import { api, useApi } from '../lib/api.js';
 import { useAuth } from '../lib/auth.js';
 import { useMeta } from '../lib/filters.jsx';
 import { ROLE_LABEL } from '../lib/format.js';
-import { Alert, Async, Card, Info, PageHeader, Tabs } from '../components/ui.jsx';
+import { Alert, Async, Card, Info, PageHeader, PasswordInput, Tabs } from '../components/ui.jsx';
 
 const NUM_FIELDS = [
-  ['errorTargetPct', 'Error target (%)', 'A product team member has “achieved the target” when their error percentage is at or below this number.'],
-  ['watchMarginPct', 'Warning margin (points)', 'Up to “target + this margin” is shown as “Keep an eye on”. Above it is “Needs improvement”.'],
+  ['errorTargetPct', 'Error rate (%)', 'A product team member has the “Lowest error rate” when their error percentage is at or below this number.'],
+  ['watchMarginPct', 'Warning margin (points)', 'Up to “error rate + this margin” is shown as “Moderate error rate”. Above it is “High error rate”.'],
   ['minSample', 'Minimum audited SKUs', 'With fewer audited SKUs than this, a person’s percentage is shown as “Too few samples” because it is not reliable yet.'],
   ['ageingWarnDays', 'Call out pending cases older than (days)', 'Pending PT or re-audit cases older than this many days are highlighted.'],
   ['weeklyReportHour', 'Create Monday report at hour (0–23)', 'Hour of the day from which Monday’s weekly report (for the Monday–Saturday week just finished) is created.'],
@@ -42,7 +42,7 @@ function Rules({ data, editable, onSaved }) {
     <form onSubmit={save}>
       {ro && <div className="mb"><Alert kind="info">Only an Admin can change these settings. You can see the current values below.</Alert></div>}
       <fieldset disabled={ro} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
-        <Card title="Targets and limits">
+        <Card title="Error rate and limits">
           <div className="grid g3">
             {NUM_FIELDS.map(([k, label, help]) => (
               <div className="field" key={k}><label htmlFor={`s-${k}`}>{label} <Info text={help} /></label><input id={`s-${k}`} type="number" step="any" value={f[k]} onChange={set(k)} required /></div>))}
@@ -129,15 +129,17 @@ function ErrorTypes({ data, editable, onSaved }) {
 /* -------------------------------- Users ----------------------------- */
 function UserRow({ u, me, reload }) {
   const [pw, setPw] = useState(null); const [err, setErr] = useState('');
-  async function patch(body) { setErr(''); try { await api.patch(`/api/users/${u.id}`, body); setPw(null); reload(); } catch (e) { setErr(e.message); } }
+  const { refresh } = useAuth();
+  async function patch(body) { setErr(''); try { await api.patch(`/api/users/${u.id}`, body); setPw(null); reload(); if (u.id === me && 'developer' in body) refresh(); } catch (e) { setErr(e.message); } } // own Developer tick: show / hide the Feedback board at once
   return (
     <tr>
       <td><b>{u.name}</b><div className="muted small">{u.username}{u.id === me ? ' (you)' : ''}</div></td>
       <td><select aria-label={`Role of ${u.username}`} value={u.role} onChange={(e) => patch({ role: e.target.value })}>{Object.entries(ROLE_LABEL).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></td>
       <td><label className="row gap-s"><input type="checkbox" checked={u.active} onChange={(e) => patch({ active: e.target.checked })} /> {u.active ? 'Can sign in' : 'Blocked'}</label></td>
+      <td><label className="row gap-s"><input type="checkbox" checked={!!u.developer} onChange={(e) => patch({ developer: e.target.checked })} /> {u.developer ? 'Developer' : 'No'}</label></td>
       <td>
         {pw === null ? <button className="btn small" onClick={() => setPw('')}>Reset password</button> : (
-          <div className="row gap-s"><input type="password" aria-label="New password" placeholder="New password (10+ characters)" value={pw} onChange={(e) => setPw(e.target.value)} autoComplete="new-password" />
+          <div className="row gap-s"><PasswordInput aria-label="New password" placeholder="New password (10+ characters)" value={pw} onChange={(e) => setPw(e.target.value)} autoComplete="new-password" />
             <button className="btn small primary" disabled={pw.length < 10} onClick={() => patch({ password: pw })}>Save</button><button className="btn small" onClick={() => setPw(null)}>Cancel</button></div>)}
         {err && <div className="small" style={{ color: 'var(--improve)' }} role="alert">{err}</div>}
       </td>
@@ -162,19 +164,20 @@ function Users() {
           <li><b>Audit Manager</b> – see all pages, upload files, undo an upload, create reports.</li>
           <li><b>Audit Team Leader</b> – upload files, review records, create reports.</li>
           <li><b>Viewer</b> – read-only: can look at dashboards and download reports.</li>
+          <li><b>Developer</b> (tick in the list below, on top of the role) – sees the Feedback board, replies to notes and marks them done. Audit Managers can also open the board and add notes.</li>
         </ul>
       </Card>
       <Card title="People who can sign in" flush>
         <Async state={st}>{(rows) => (
-          <div className="tbl-wrap"><table className="tbl"><thead><tr><th>User</th><th>Role</th><th>Access</th><th>Password</th></tr></thead>
-            <tbody>{rows.map((u) => <UserRow key={u.id + u.role + u.active} u={u} me={user.id} reload={st.reload} />)}</tbody></table></div>)}</Async>
+          <div className="tbl-wrap"><table className="tbl"><thead><tr><th>User</th><th>Role</th><th>Access</th><th>Developer <Info text="A developer sees the Feedback board, replies to notes and marks them done. Audit Managers can see the board and add notes. Nobody else sees it." /></th><th>Password</th></tr></thead>
+            <tbody>{rows.map((u) => <UserRow key={`${u.id}-${u.role}-${u.active}-${u.developer}`} u={u} me={user.id} reload={st.reload} />)}</tbody></table></div>)}</Async>
       </Card>
       <form onSubmit={add}><Card title="Add a user" className="mt">
         <div className="grid g4">
           <div className="field"><label htmlFor="nu">Username</label><input id="nu" type="text" value={f.username} onChange={set('username')} required minLength={3} autoComplete="off" /></div>
           <div className="field"><label htmlFor="nn">Full name</label><input id="nn" type="text" value={f.name} onChange={set('name')} required /></div>
           <div className="field"><label htmlFor="nr">Role</label><select id="nr" value={f.role} onChange={set('role')}>{Object.entries(ROLE_LABEL).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
-          <div className="field"><label htmlFor="np">Password (10+ characters)</label><input id="np" type="password" value={f.password} onChange={set('password')} required minLength={10} autoComplete="new-password" /></div>
+          <div className="field"><label htmlFor="np">Password (10+ characters)</label><PasswordInput id="np" value={f.password} onChange={set('password')} required minLength={10} autoComplete="new-password" /></div>
         </div>
         <div className="row mt-s"><button className="btn primary" disabled={busy}>{busy ? 'Adding…' : 'Add user'}</button></div>
         <Msg m={msg} />
@@ -200,9 +203,9 @@ function Account() {
     <form onSubmit={save}><Card title="Change my password">
       <p className="muted" style={{ marginTop: 0 }}>Signed in as <b>{user.name}</b> ({ROLE_LABEL[user.role]}).</p>
       <div className="grid g3">
-        <div className="field"><label htmlFor="pc">Current password</label><input id="pc" type="password" value={f.current} onChange={set('current')} autoComplete="current-password" required /></div>
-        <div className="field"><label htmlFor="pn">New password (10+ characters)</label><input id="pn" type="password" value={f.next} onChange={set('next')} autoComplete="new-password" required minLength={10} /></div>
-        <div className="field"><label htmlFor="pa">New password again</label><input id="pa" type="password" value={f.again} onChange={set('again')} autoComplete="new-password" required /></div>
+        <div className="field"><label htmlFor="pc">Current password</label><PasswordInput id="pc" value={f.current} onChange={set('current')} autoComplete="current-password" required /></div>
+        <div className="field"><label htmlFor="pn">New password (10+ characters)</label><PasswordInput id="pn" value={f.next} onChange={set('next')} autoComplete="new-password" required minLength={10} /></div>
+        <div className="field"><label htmlFor="pa">New password again</label><PasswordInput id="pa" value={f.again} onChange={set('again')} autoComplete="new-password" required /></div>
       </div>
       <div className="row mt-s"><button className="btn primary" disabled={busy}>{busy ? 'Saving…' : 'Change password'}</button></div>
       <Msg m={msg} />
@@ -241,7 +244,7 @@ function EmailSetup() {
           <div className="field"><label htmlFor="m-port">Port</label><input id="m-port" type="number" value={f.port} onChange={set('port')} /></div>
           <label className="row gap-s" style={{ alignSelf: 'end', paddingBottom: 6 }}><input type="checkbox" checked={!!f.secure} onChange={set('secure')} /><span>Secure connection from the start (port 465) <Info text="Leave off for port 587 (the connection is secured after it starts). Turn on only for port 465." /></span></label>
           <div className="field"><label htmlFor="m-user">Username</label><input id="m-user" type="text" value={f.user} onChange={set('user')} autoComplete="off" placeholder="audit@company.com" /></div>
-          <div className="field"><label htmlFor="m-pass">Password</label><input id="m-pass" type="password" value={f.pass} onChange={set('pass')} autoComplete="new-password" placeholder={f.hasPassword ? 'saved – leave empty to keep it' : ''} /></div>
+          <div className="field"><label htmlFor="m-pass">Password</label><PasswordInput id="m-pass" value={f.pass} onChange={set('pass')} autoComplete="new-password" placeholder={f.hasPassword ? 'saved – leave empty to keep it' : ''} /></div>
           <div />
           <div className="field"><label htmlFor="m-from">Send from (address)</label><input id="m-from" type="text" value={f.fromAddress} onChange={set('fromAddress')} placeholder="audit@company.com" /></div>
           <div className="field"><label htmlFor="m-name">Sender name</label><input id="m-name" type="text" value={f.fromName} onChange={set('fromName')} placeholder="Audit Team" /></div>

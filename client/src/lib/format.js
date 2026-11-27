@@ -12,9 +12,9 @@ export const plural = (n, one, many) => `${num(n)} ${n === 1 ? one : many || one
 export const bytes = (n) => (n > 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
 
 export const LEVELS = {
-  good: { label: 'Achieved target', icon: '✔', cls: 'good', help: 'Error percentage is at or below the target – target achieved.' },
-  watch: { label: 'Keep an eye on', icon: '●', cls: 'watch', help: 'A little above the target.' },
-  improve: { label: 'Needs improvement', icon: '▲', cls: 'improve', help: 'Well above the target.' },
+  good: { label: 'Lowest error rate', icon: '✔', cls: 'good', help: 'Error rate is at or below the set error rate – lowest error rate.' },
+  watch: { label: 'Moderate error rate', icon: '●', cls: 'watch', help: 'A little above the set error rate.' },
+  improve: { label: 'High error rate', icon: '▲', cls: 'improve', help: 'Well above the set error rate.' },
   few: { label: 'Too few samples', icon: '◔', cls: 'few', help: 'Not enough audited SKUs yet to judge fairly.' },
   none: { label: 'Nothing audited', icon: '–', cls: 'few', help: 'No SKUs were audited in this period.' },
 };

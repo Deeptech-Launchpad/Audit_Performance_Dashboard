@@ -37,7 +37,7 @@ function Hero({ d, margin }) {
       <div className="hero-main" role="status">
         <div className="hero-eyebrow">{greeting()}{first ? `, ${first}` : ''}</div>
         {k.samples
-          ? <h2 className="hero-title">{tone === 'good' ? <><span className="hero-ok">✔</span> The team achieved the target.</> : 'The team is above the error target.'}</h2>
+          ? <h2 className="hero-title">{tone === 'good' ? <><span className="hero-ok">✔</span> The team has the lowest error rate.</> : 'The team is above the set error rate.'}</h2>
           : <><h2 className="hero-title">Nothing was audited here yet.</h2><p className="hero-sentence">No SKUs were audited in this selection, so there is no error percentage to show.</p></>}
       </div>
       <div className="hero-fig">
@@ -45,7 +45,7 @@ function Hero({ d, margin }) {
         <div className="hero-num" aria-label={`Team error rate ${pct(k.errorRate)}`}><AnimatedValue value={pct(k.errorRate)} /></div>
         <div className="hero-status">
           {tone && <span className={`badge ${LEVELS[tone].cls}`}><span aria-hidden="true">{LEVELS[tone].icon}</span> {LEVELS[tone].label}</span>}
-          <span className="hero-target">Target: {d.target}% or lower</span>
+          <span className="hero-target">Error rate: {d.target}% or lower</span>
         </div>
       </div>
     </section>
@@ -115,7 +115,7 @@ export default function Overview() {
               </div>)}
 
             <div className="ov-main">
-              <Card title="Error % week by week" info="SKUs with errors ÷ samples audited, for each week. The dashed line is the target.">
+              <Card title="Error % week by week" info="SKUs with errors ÷ samples audited, for each week. The dashed line is the set error rate.">
                 {wk.length ? <ErrorTrend data={wk} target={target} /> : <div className="empty">No weekly data yet.</div>}
                 {wk.length === 1 && <p className="muted small">Only one week of data so far – the trend appears after more files are uploaded.</p>}
               </Card>
@@ -127,11 +127,11 @@ export default function Overview() {
             </div>
 
             <div className="grid g2 mt">
-              <Card title="Top 3 – Product Team" info={`Up to three people whose error percentage (SKUs with errors ÷ audited SKUs) is at or under the target of ${target}%, lowest first. Only people with at least ${d.top.minSample} audited SKUs are counted, so a lucky small sample does not win. If fewer than three people are under the target, fewer are shown.`}>
+              <Card title="Top 3 – Product Team" info={`Up to three people whose error percentage (SKUs with errors ÷ audited SKUs) is at or under the set error rate of ${target}%, lowest first. Only people with at least ${d.top.minSample} audited SKUs are counted, so a lucky small sample does not win. If fewer than three people are under it, fewer are shown.`}>
                 {d.top.content.length ? (
                   <ol className="lr-list">{d.top.content.map((m, i) => (
                     <ListRow key={m.id ?? m.name} n={i + 1} name={m.name} to={personLink('/content', 'builderId', m.id)} valueText={pct(m.errorRate)} line={`${m.errorSkus} of ${m.samples} audited SKUs had errors`} />))}</ol>
-                ) : d.top.ranked ? <div className="empty">Nobody is at or under the {target}% target yet.</div>
+                ) : d.top.ranked ? <div className="empty">Nobody is at or under the {target}% error rate yet.</div>
                   : <div className="empty">Nobody has {d.top.minSample} or more audited SKUs yet, so nobody can be ranked fairly.</div>}
                 <div className="mt-s"><Link to={withFilters('/content')}>See everyone on the Product Team page →</Link></div>
               </Card>

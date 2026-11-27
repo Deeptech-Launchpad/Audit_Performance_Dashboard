@@ -150,3 +150,21 @@ CREATE TABLE IF NOT EXISTS weekly_reports (
   summary_json TEXT NOT NULL
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_weekly ON weekly_reports(period_start) WHERE kind = 'weekly';
+
+-- Feedback board: bugs / feature requests from users to the developer
+CREATE TABLE IF NOT EXISTS notes (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  kind        TEXT NOT NULL DEFAULT 'bug',      -- bug | feature | other
+  title       TEXT NOT NULL,
+  details     TEXT NOT NULL DEFAULT '',
+  page        TEXT NOT NULL DEFAULT '',
+  priority    TEXT NOT NULL DEFAULT 'normal',   -- low | normal | high
+  status      TEXT NOT NULL DEFAULT 'new',      -- new | in_progress | done | wont_do
+  reply       TEXT NOT NULL DEFAULT '',
+  created_by  INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  created_at  TEXT NOT NULL,
+  updated_at  TEXT NOT NULL,
+  done_at     TEXT,
+  done_by     INTEGER REFERENCES users(id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS ix_notes_status ON notes(status);
