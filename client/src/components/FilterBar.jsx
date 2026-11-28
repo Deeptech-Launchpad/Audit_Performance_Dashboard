@@ -42,6 +42,10 @@ export default function FilterBar({ show = ['period', 'builder', 'auditor'], all
       {show.includes('errorCode') && sel('errorCode', 'Error type', meta.errorTypes.filter((t) => t.isError).map((t) => [t.code, `${t.name} (${t.code})`]))}
       {show.includes('ptStatus') && sel('ptStatus', 'PT status', [['__none__', '(no status recorded)'], ...meta.ptStatuses.map((s) => [s, s])])}
       {active.length > 0 && <button className="btn small" onClick={clear}>Clear filters</button>}
+      {/* the File box stays compact; the chosen file's FULL name is shown on one slim line below */}
+      {show.includes('file') && v.uploadId && (() => { const u = (meta.uploads || []).find((x) => String(x.id) === String(v.uploadId)); return u ? (
+        <div className="file-chip" role="status"><span className="file-chip-k">File</span><span className="file-chip-n">{u.name}</span><span className="muted">· {date(u.auditDate)}</span>
+          <button type="button" className="file-chip-x" aria-label="Show all files" title="Show all files" onClick={() => set({ uploadId: '' })}>×</button></div>) : null; })()}
     </div>
   );
 }
