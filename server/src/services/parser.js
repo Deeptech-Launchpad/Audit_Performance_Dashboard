@@ -7,6 +7,7 @@
 //  * Summary tables / dashboards inside the workbook are never read and never used for any number.
 //  * Original text is kept as written (only leading/trailing spaces are trimmed).
 import * as XLSX from 'xlsx';
+import { commentAttributes } from './commentAttrs.js';
 
 export const COLUMN_LIMIT = 14; // A..N
 export const COL_LETTER = (i) => String.fromCharCode(65 + i);
@@ -28,7 +29,7 @@ export const FIELDS = {
   gapSimilar: { label: 'Gap/Similar', syn: ['gap/similar', 'gap / similar', 'gap similar'] },
   ptResponse: { label: 'PT Response', syn: ['pt response'] },
   cfbAttribute: { label: 'CFB Attribute', syn: ['cfb attribute'] },
-  cfbComments: { label: 'CFB Comments', syn: ['cfb comments', 'cfb comment'] },
+  cfbComments: { label: 'CFB Comments', syn: ['cfb comments', 'cfb comment', 'cfb attr/comments', 'cfb attr / comments', 'cfb attribute/comments', 'cfb attr comments'] },
 };
 export const AUDIT_FIELD_KEYS = Object.keys(FIELDS);
 const SYN = Object.fromEntries(Object.entries(FIELDS).map(([k, f]) => [k, f.syn.map(norm)]));
@@ -93,7 +94,7 @@ export function detectTable(wb) {
 --------------------------------------------------------------------------------------------------------------- */
 const ATT_RE = /^att(?:ribute)?[\s_.:-]*(\d+)$/i; const RAW_RE = /^raw[\s_.-]*val(?:ue)?[\s_.:-]*(\d+)$/i; const BUILD_RE = /^build[\s_.-]*val(?:ue)?[\s_.:-]*(\d+)$/i;
 const cellText = (ws, r, c) => { const x = ws[XLSX.utils.encode_cell({ r, c })]; return x && x.v !== undefined ? clean(x.w ?? x.v) : ''; };
-const attrKey = (s) => String(s ?? '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+const attrKey = (s) => String(s ?? '').replace(/[‐-―−]/g, '-').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
 export function readAttributeColumns(wb, table) {
   const ws = wb.Sheets[table.name]; if (!ws || !ws['!ref']) return null;
@@ -106,13 +107,13 @@ export function readAttributeColumns(wb, table) {
   if (!usable.length) return null;
   const rows = new Map();
   for (let r = hr + 1; r <= rg.e.r; r++) {
-    const assigned = new Set(); const enriched = new Set();
+    const assigned = new Set(); const enriched = new Set(); const names = [];
     for (const s of usable) {
       const name = cellText(ws, r, s.att); if (!name) continue;
-      assigned.add(attrKey(name));
+      assigned.add(attrKey(name)); names.push(name);
       if ((s.raw != null && cellText(ws, r, s.raw)) || (s.build != null && cellText(ws, r, s.build))) enriched.add(attrKey(name));
     }
-    rows.set(r + 1, { assigned, enriched });
+    rows.set(r + 1, { assigned, enriched, names }); // names = the SKU's attribute names as written (used to read the auditor's comment)
   }
   return { slotCount: usable.length, rows };
 }
@@ -181,6 +182,11 @@ export function readSourceColumns(wb, table) {
   const rows = new Map();
   for (let r = hr + 1; r <= rg.e.r; r++) {
     const wanted = new Set(splitAttributes(cellText(ws, r, table.idx.attribute)).map(attrKey).filter(Boolean));
+    // + the attributes the auditor names in the comment (only on rows with an error code), so their source can be checked too
+    if (table.idx.auditComments != null && table.idx.errorType != null && isErrorRow(cellText(ws, r, table.idx.errorType))) {
+      const names = attSlots.map((s) => cellText(ws, r, s.att)).filter(Boolean);
+      for (const n of commentAttributes(cellText(ws, r, table.idx.auditComments), names)) wanted.add(attrKey(n));
+    }
     if (!wanted.size) continue;
     const attrs = {};
     for (const s of attSlots) {
@@ -212,6 +218,8 @@ export const splitCodes = (cell) => {
   }
   return { codes, rejected };
 };
+/** true when the Error Type cell has an error code other than OK / SG (suggestion) */
+export const isErrorRow = (cell) => splitCodes(cell).codes.some((c) => c !== 'OK' && c !== 'SG');
 export const splitAttributes = (cell) => {
   const out = []; const seen = new Set();
   for (const a of clean(cell).split(/[|;\n]+/).map((x) => x.trim()).filter(Boolean)) {
@@ -230,7 +238,7 @@ export function parseTable(table, attr = null, tax = null, src = null) {
 
   for (let i = headerRow + 1; i < aoa.length; i++) {
     const r = aoa[i]; const rowNo = i + 1; // true spreadsheet row number
-    const o = {}; for (const k of Object.keys(idx)) o[k] = get(r, k);
+    const o = {}; for (const k of Object.keys(FIELDS)) o[k] = get(r, k); // every field, '' when the file has no such column
     if (!Object.values(o).some(Boolean)) { blankRows++; continue; }
     if (!o.skuId) { skipped.push({ rowNo, skuId: '', reason: 'SKU ID is empty' }); continue; }
     const { codes, rejected } = splitCodes(o.errorType);
@@ -250,13 +258,19 @@ export function parseTable(table, attr = null, tax = null, src = null) {
     // attribute counts: how many attributes this SKU has filled in, and what kind of field each error attribute (column F) is
     const ad = attr ? attr.rows.get(rowNo) : null;
     const attrsEnriched = attr ? (ad ? ad.enriched.size : 0) : null;
-    const attrDetail = attrs.map((nm) => {
+    const fromF = attrs.map((nm) => {
       const k = attrKey(nm);
       if (k === 'all') return { name: nm, isAttribute: 0, wasEnriched: null };            // "All" = the whole SKU, not one attribute
       if (!attr) return { name: nm, isAttribute: 1, wasEnriched: null };                  // no attribute list in the file: cannot check
       const isAttribute = ad && ad.assigned.has(k) ? 1 : 0;                              // not in the SKU's list (e.g. "Source", "Page Number") = other field
       return { name: nm, isAttribute, wasEnriched: isAttribute ? (ad.enriched.has(k) ? 1 : 0) : null };
     });
+    // + attributes the auditor names only in the comment (every auditor's format), when they are attributes of THIS SKU.
+    // Only on rows with an error code (SG / OK rows are not errors). Column F stays as it is; nothing is counted twice.
+    const fromComment = ad && isErrorRow(o.errorType) ? commentAttributes(o.auditComments, ad.names)
+      .filter((nm) => !fromF.some((x) => attrKey(x.name) === attrKey(nm)))
+      .map((nm) => ({ name: nm, isAttribute: 1, wasEnriched: ad.enriched.has(attrKey(nm)) ? 1 : 0, fromComment: 1 })) : [];
+    const attrDetail = [...fromF, ...fromComment];
     rows.push({
       rowNo, skuId: o.skuId, builder: o.builder, sampleFlag, sampled, auditor: o.auditor, attrsEnriched, attrDetail,
       taxonomy: tax ? (tax.rows.get(rowNo) || '') : null,    // null = this file has no PIM Taxonomy column

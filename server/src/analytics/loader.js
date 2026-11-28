@@ -68,13 +68,13 @@ export async function loadRecords(db, f, errTypes, { text = false } = {}) {
   if (!rows.length) return [];
   const wd = where(f, { dateOnly: true });
   const codes = await db.all(`SELECT c.audit_record_id AS id, c.code FROM error_classifications c JOIN audit_records r ON r.id = c.audit_record_id ${wd.sql} ORDER BY c.id`, wd.params);
-  const attrs = await db.all(`SELECT c.audit_record_id AS id, c.attribute, c.is_attribute, c.was_enriched FROM record_attributes c JOIN audit_records r ON r.id = c.audit_record_id ${wd.sql}`, wd.params);
+  const attrs = await db.all(`SELECT c.audit_record_id AS id, c.attribute, c.is_attribute, c.was_enriched, c.from_comment FROM record_attributes c JOIN audit_records r ON r.id = c.audit_record_id ${wd.sql}`, wd.params);
   const cm = new Map(); for (const c of codes) { if (!cm.has(c.id)) cm.set(c.id, []); cm.get(c.id).push(c.code); }
   const am = new Map(); const ai = new Map();
   for (const a of attrs) {
     if (!am.has(a.id)) { am.set(a.id, []); ai.set(a.id, []); }
     am.get(a.id).push(a.attribute);
-    ai.get(a.id).push({ name: a.attribute, isAttribute: !!a.is_attribute, wasEnriched: a.was_enriched == null ? null : !!a.was_enriched });
+    ai.get(a.id).push({ name: a.attribute, isAttribute: !!a.is_attribute, wasEnriched: a.was_enriched == null ? null : !!a.was_enriched, fromComment: !!Number(a.from_comment) });
   }
   // Counting rule (Settings -> "count an error only after the re-audit"): audit finds the error -> PT fixes it -> re-audit checks it.
   // The error counts when the re-audit is done ("ok"-type comment, or the re-auditor's notes) AND PT did not answer "Not Updated"

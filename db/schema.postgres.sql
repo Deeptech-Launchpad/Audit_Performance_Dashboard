@@ -161,6 +161,8 @@ ALTER TABLE record_attributes ADD COLUMN IF NOT EXISTS is_attribute BIGINT NOT N
 ALTER TABLE record_attributes ADD COLUMN IF NOT EXISTS was_enriched BIGINT;
 ALTER TABLE audit_records ADD COLUMN IF NOT EXISTS taxonomy TEXT;
 ALTER TABLE audit_records ADD COLUMN IF NOT EXISTS source_info TEXT;
+ALTER TABLE record_attributes ADD COLUMN IF NOT EXISTS from_comment BIGINT NOT NULL DEFAULT 0;   -- 1 = found in the Audit Comments, not in column F
+ALTER TABLE uploads ADD COLUMN IF NOT EXISTS comment_attrs_v BIGINT;                         -- version of the comment reader applied to this upload
 ALTER TABLE users ADD COLUMN IF NOT EXISTS is_developer BIGINT NOT NULL DEFAULT 0;   -- can answer the Feedback board
 
 -- Feedback board: bugs / feature requests from users to the developer

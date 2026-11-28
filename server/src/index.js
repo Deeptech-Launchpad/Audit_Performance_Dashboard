@@ -4,12 +4,16 @@ import { createApp } from './app.js';
 import { seedReferenceData, getSettings } from './services/settings.js';
 import { refreshTracking } from './services/followup.js';
 import { generateDueWeeklyReports, refreshWeeklyPeriods } from './services/reports.js';
-import { purgeStalePreviews, backfillProjects } from './services/importer.js';
+import { purgeStalePreviews, backfillProjects, backfillCommentAttributes } from './services/importer.js';
 
 const db = await openDb();
 await seedReferenceData(db);
 await backfillProjects(db);
 await refreshTracking(db, await getSettings(db)); // PT / re-audit status of every record, read with the current rules (cheap; keeps old uploads in step with rule changes)
+{ // files imported before the Audit Comments were read: add the attributes named in the comments (once per file)
+  const ca = await backfillCommentAttributes(db);
+  if (ca.files || ca.noOriginal) console.log(`[comment attributes] ${ca.files} file(s) read again: ${ca.added} attribute(s) found in comments on ${ca.records} SKU(s)${ca.noOriginal ? `; ${ca.noOriginal} file(s) have no kept original – upload them again` : ''}`);
+}
 const converted = await refreshWeeklyPeriods(db); // weekly reports made when a week still ended on Sunday -> Monday to Saturday
 if (converted) console.log(`[reports] ${converted} saved weekly report(s) now cover Monday to Saturday`);
 const app = createApp(db);

@@ -149,7 +149,8 @@ export function dataRouter(db) {
   const SORT = { skuId: 'skuId', builder: 'builder', auditor: 'auditor', auditDate: 'auditDate', errorRaw: 'errorRaw', attributeField: 'attributeField', ptRaw: 'ptRaw', ptClass: 'ptClass' };
   const rowOut = (x) => ({ id: x.id, skuId: x.skuId, auditDate: x.auditDate, builder: x.builder, sampled: x.sampled, sample: x.sampleFlag, auditor: x.auditor || '', errorType: x.errorRaw, attribute: x.attributeField,
     auditComments: x.auditComments, ptStatus: x.ptRaw, ptComments: x.ptComments, reauditComments: x.reauditComments, gapSimilar: x.gapSimilar, ptResponse: x.ptResponse, cfbAttribute: x.cfbAttribute, cfbComments: x.cfbComments,
-    ptClass: x.ptClass, reaudit: x.reaudit, codes: x.codes, errorCodes: x.errs });
+    ptClass: x.ptClass, reaudit: x.reaudit, codes: x.codes, errorCodes: x.errs,
+    attributes: (x.attrInfo || []).filter((a) => a.isAttribute).map((a) => ({ name: a.name, fromComment: !!a.fromComment })) });
   const sorted = (recs, key, dir) => { const k = SORT[key] || 'auditDate'; const m = dir === 'asc' ? 1 : -1; return recs.slice().sort((a, b) => m * String(a[k] ?? '').localeCompare(String(b[k] ?? ''), undefined, { numeric: true }) || a.id - b.id); };
 
   r.get('/records', wrap(async (req, res) => {

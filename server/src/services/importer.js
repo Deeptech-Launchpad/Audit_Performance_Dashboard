@@ -1,10 +1,13 @@
 // Upload pipeline:  stage (read + validate, nothing saved to the audit data)  ->  analyze (duplicates, cross-check)
 //                   ->  commit (one database transaction)  ->  report.
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import { findOriginal } from './originals.js';
 import { readWorkbook, detectTable, parseTable, readAttributeColumns, readTaxonomyColumn, readSourceColumns, l1Category, ReadError, FIELDS } from './parser.js';
 
 // Bump when the way a file is read changes: older, still-unreviewed previews must be uploaded again.
-const PARSER_VERSION = 6;
+const PARSER_VERSION = 7; // 7: attributes named in the Audit Comments are read too
+export const COMMENT_ATTRS_VERSION = 1;
 import { getErrorTypes, getSettings } from './settings.js';
 import { classifyFollowUp, writeTracking } from './followup.js';
 import { dateFromFilename, isValidISO, weekStart, monthOf, parseISO } from '../lib/dates.js';
@@ -250,7 +253,7 @@ export async function commitUpload(db, uploadId, { auditDate, decisions = {}, ta
         [uploadId, r.skuId, recordKey(r, date, settings.dedupeIncludeDate), date, weekStart(date), monthOf(date), ...vals]);
       }
       for (const c of r.codes) await tx.run('INSERT INTO error_classifications (audit_record_id, code) VALUES (?,?)', [id, c]);
-      if (!existingId || r.attrsEnriched != null) for (const at of r.attrDetail) await tx.run('INSERT INTO record_attributes (audit_record_id, attribute, is_attribute, was_enriched) VALUES (?,?,?,?)', [id, at.name, at.isAttribute, at.wasEnriched]);
+      if (!existingId || r.attrsEnriched != null) for (const at of r.attrDetail) await tx.run('INSERT INTO record_attributes (audit_record_id, attribute, is_attribute, was_enriched, from_comment) VALUES (?,?,?,?,?)', [id, at.name, at.isAttribute, at.wasEnriched, at.fromComment ? 1 : 0]);
       await writeTracking(tx, id, r, classifyFollowUp(r, settings));
       return id;
     };
@@ -271,7 +274,7 @@ export async function commitUpload(db, uploadId, { auditDate, decisions = {}, ta
       skipped: res.skipped, updated: res.updatedRows, validation: a.validation, columns: a.columns, computed: a.computed, dataChecks: a.dataChecks,
       decisionsChanged: Object.keys(decisions).length,
     };
-    await tx.run(`UPDATE uploads SET status='imported', imported_at=?, audit_date=?, sheet_name=?, header_row=?, total_rows=?, imported_rows=?, updated_rows=?, skipped_rows=?, has_unsampled=?, project=?, report_json=?, staged_json=NULL WHERE id=?`,
+    await tx.run(`UPDATE uploads SET status='imported', comment_attrs_v=${COMMENT_ATTRS_VERSION}, imported_at=?, audit_date=?, sheet_name=?, header_row=?, total_rows=?, imported_rows=?, updated_rows=?, skipped_rows=?, has_unsampled=?, project=?, report_json=?, staged_json=NULL WHERE id=?`,
       [now(), date, t.sheet, t.headerRow, a.counts.rowsRead, res.imported, res.updated, res.skipped.length, t.listsUnsampledSkus ? 1 : 0, projectName, JSON.stringify(report), uploadId]);
   });
   return { imported: res.imported, updated: res.updated, skipped: res.skipped.length };
@@ -295,4 +298,45 @@ export async function undoUpload(db, uploadId) {
 export async function purgeStalePreviews(db, hours = 24) {
   const cutoff = new Date(Date.now() - hours * 3600e3).toISOString();
   await db.run(`UPDATE uploads SET status='discarded', staged_json=NULL WHERE status='preview' AND uploaded_at < ?`, [cutoff]);
+}
+
+/* ------------------------------------------------- comment attributes for files imported earlier */
+/** Files imported before the Audit Comments were read: read their kept original again (data/originals) and add the attributes
+ *  the auditor names in the comment. Only record_attributes rows marked from_comment are replaced; column F, error codes,
+ *  PT / re-audit data and everything else stay exactly as they are. Runs once per upload (uploads.comment_attrs_v). */
+export async function backfillCommentAttributes(db) {
+  const ups = await db.all(`SELECT id, original_name, file_hash, audit_date, sheet_name FROM uploads WHERE status = 'imported' AND (comment_attrs_v IS NULL OR comment_attrs_v < ?) ORDER BY id`, [COMMENT_ATTRS_VERSION]);
+  const out = { files: 0, records: 0, added: 0, noOriginal: 0 };
+  if (!ups.length) return out;
+  const settings = await getSettings(db);
+  for (const up of ups) {
+    const orig = findOriginal(up);
+    if (!orig) { out.noOriginal++; continue; } // uploaded before copies were kept: upload the file again to get the comment attributes
+    let t;
+    try {
+      const wb = readWorkbook(fs.readFileSync(orig.file), up.original_name);
+      const { usable } = detectTable(wb); const pick = usable.find((x) => x.sheet === up.sheet_name || x.name === up.sheet_name) || usable[0];
+      if (!pick) { out.noOriginal++; continue; }
+      t = parseTable(pick, readAttributeColumns(wb, pick), null, readSourceColumns(wb, pick));
+    } catch (e) { console.warn(`[comment attributes] could not read ${up.original_name}: ${e.message}`); continue; }
+    await db.tx(async (tx) => {
+      for (const r of t.rows) {
+        const rec = await tx.get('SELECT id FROM audit_records WHERE record_key = ? ORDER BY (upload_id = ?) DESC, id DESC', [recordKey(r, up.audit_date, settings.dedupeIncludeDate), up.id])
+          || await tx.get('SELECT id FROM audit_records WHERE upload_id = ? AND sku_id = ? ORDER BY id', [up.id, r.skuId]);
+        if (!rec) continue;
+        await tx.run('DELETE FROM record_attributes WHERE audit_record_id = ? AND from_comment = 1', [rec.id]);
+        const have = new Set((await tx.all('SELECT attribute FROM record_attributes WHERE audit_record_id = ?', [rec.id])).map((a) => a.attribute.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()));
+        let n = 0;
+        for (const at of r.attrDetail.filter((a) => a.fromComment)) {
+          const k = at.name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); if (have.has(k)) continue; have.add(k);
+          await tx.run('INSERT INTO record_attributes (audit_record_id, attribute, is_attribute, was_enriched, from_comment) VALUES (?,?,?,?,1)', [rec.id, at.name, at.isAttribute, at.wasEnriched]); n++;
+        }
+        if (r.sourceInfo) await tx.run('UPDATE audit_records SET source_info = ? WHERE id = ?', [r.sourceInfo, rec.id]); // source values / links for those attributes too
+        if (n) { out.records++; out.added += n; }
+      }
+      await tx.run('UPDATE uploads SET comment_attrs_v = ? WHERE id = ?', [COMMENT_ATTRS_VERSION, up.id]);
+    });
+    out.files++;
+  }
+  return out;
 }

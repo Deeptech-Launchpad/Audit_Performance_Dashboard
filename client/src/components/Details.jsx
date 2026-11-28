@@ -44,6 +44,7 @@ function SkuDrawer({ skuId, onClose }) {
                 {h.auditor && <><dt>Audited by</dt><dd>{h.auditor}</dd></>}
                 {h.codes.length > 0 && <><dt>Error type</dt><dd><CodeTags codes={h.codes} /> <span className="muted small">{h.codes.map((c) => names[c] || c).join(', ')}</span></dd></>}
                 {h.attribute && <><dt>Attribute / field</dt><dd>{h.attribute}</dd></>}
+                {h.attributes?.some((a) => a.fromComment) && <><dt>Attributes with errors</dt><dd className="attr-list">{h.attributes.map((a) => <span key={a.name} className={`badge ${a.fromComment ? 'info' : 'plain'}`} title={a.fromComment ? 'Named in the audit comment (not in Attribute/Field) – counted as an attribute error' : 'From Attribute/Field'}>{a.name}{a.fromComment ? ' · comment' : ''}</span>)}</dd></>}
                 {h.auditComments && <><dt>Audit comments</dt><dd>{h.auditComments}</dd></>}
                 {h.ptStatus && <><dt>PT status</dt><dd>{h.ptStatus} <span className="muted small">({PT_CLASS[h.ptClass]})</span></dd></>}
                 {h.ptComments && <><dt>PT comments</dt><dd>{h.ptComments}</dd></>}

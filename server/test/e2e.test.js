@@ -102,8 +102,9 @@ t('import is blocked without an audit date and works with one; numbers match the
   assert.equal(o.kpis.sampleRate, 18.74);                       // 104/555 (the workbook's 18.91 uses 550)
   assert.equal(o.reconciliation.extra, 3);
   // attribute based (Att n / Raw Val n / Build Val n columns counted): 4957 attributes carry a value in this file; 45 attribute names are
-  // named in "Attribute/Field" of error SKUs, 43 of them are real attributes of the SKU and 2 are other fields ("Source")
-  assert.deepEqual([o.kpis.attrsAvailable, o.kpis.attrsEnriched, o.kpis.attrErrors, o.kpis.otherFieldErrors], [true, 4957, 43, 2]);
+  // named in "Attribute/Field" of error SKUs, 43 of them are real attributes of the SKU and 2 are other fields ("Source").
+  // Since Nov 2026 the attributes the auditor names in the Audit Comments are added too (81 more, e.g. 433NA1 "…|Filtration Type>>…"): 124.
+  assert.deepEqual([o.kpis.attrsAvailable, o.kpis.attrsEnriched, o.kpis.attrErrors, o.kpis.otherFieldErrors], [true, 4957, 124, 2]);
   assert.ok(o.kpis.attrsAudited >= 1 && o.kpis.attrErrorRate > 0 && o.kpis.attrErrorRate < 100);
   assert.equal(o.reconciliation.multiErrorSkus.length, 2);      // DE|DM and DE|DM|UE  (SG|DM has one real error)
 

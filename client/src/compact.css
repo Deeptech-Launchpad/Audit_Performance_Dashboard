@@ -142,3 +142,6 @@ body { font-size: 13px; }
 .file-chip .muted { flex: none; white-space: nowrap; }
 .file-chip-x { flex: none; margin-left: auto; border: 0; background: none; color: var(--ink-3); font-size: 17px; line-height: 1; cursor: pointer; padding: 0 6px; border-radius: 6px; }
 .file-chip-x:hover { color: var(--improve); background: var(--surface); }
+
+/* SKU details: attributes counted as errors (from Attribute/Field or found in the audit comment) */
+.attr-list { display: flex; flex-wrap: wrap; gap: 4px; }
