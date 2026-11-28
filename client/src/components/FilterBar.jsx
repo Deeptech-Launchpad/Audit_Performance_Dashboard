@@ -16,7 +16,7 @@ export default function FilterBar({ show = ['period', 'builder', 'auditor'], all
   };
   const sel = (key, label, options, help) => (
     <div className="field"><label htmlFor={`f-${key}`}>{label}</label>
-      <select id={`f-${key}`} value={v[key]} onChange={(e) => set({ [key]: e.target.value })} title={help}>
+      <select id={`f-${key}`} value={v[key]} onChange={(e) => set({ [key]: e.target.value })} title={(v[key] && options.find(([val]) => String(val) === String(v[key]))?.[1]) || help}>
         <option value="">All</option>{options.map(([val, text]) => <option key={val} value={val}>{text}</option>)}
       </select></div>
   );
@@ -38,7 +38,7 @@ export default function FilterBar({ show = ['period', 'builder', 'auditor'], all
       {show.includes('project') && sel('project', 'Project', projectOptions, 'Show only the files of one project (named by its first word, for example Grainger)')}
       {show.includes('builder') && sel('builderId', 'Product team member', meta.builders.map((b) => [b.id, b.name]))}
       {show.includes('auditor') && sel('auditorId', 'Auditor', meta.auditors.map((b) => [b.id, b.name]))}
-      {show.includes('file') && sel('uploadId', 'File', (meta.uploads || []).map((u) => [u.id, `${date(u.auditDate)} · ${u.name.length > 42 ? u.name.slice(0, 40) + '…' : u.name}`]), 'Show only the records that came from one uploaded file')}
+      {show.includes('file') && sel('uploadId', 'File', (meta.uploads || []).map((u) => [u.id, `${date(u.auditDate)} · ${u.name}`]), 'Show only the records that came from one uploaded file')}
       {show.includes('errorCode') && sel('errorCode', 'Error type', meta.errorTypes.filter((t) => t.isError).map((t) => [t.code, `${t.name} (${t.code})`]))}
       {show.includes('ptStatus') && sel('ptStatus', 'PT status', [['__none__', '(no status recorded)'], ...meta.ptStatuses.map((s) => [s, s])])}
       {active.length > 0 && <button className="btn small" onClick={clear}>Clear filters</button>}

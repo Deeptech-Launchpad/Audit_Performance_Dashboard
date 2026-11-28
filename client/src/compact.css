@@ -131,3 +131,8 @@ body { font-size: 13px; }
 
 /* (i) help bubble: floats on top of the page (placed by Info in ui.jsx), never behind the filter bar */
 .info-pop.info-float { display: block; position: fixed; z-index: 1000; bottom: auto; transform: none; visibility: hidden; pointer-events: none; }
+
+/* Full file names everywhere: long names wrap instead of being cut with "…" */
+.rep-item-t { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
+.search-item .clip1 { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
+.filters #f-uploadId { max-width: min(640px, 100%); }
