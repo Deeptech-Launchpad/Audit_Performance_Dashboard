@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { ANIMATE } from '../lib/motion.js';
 import { LEVELS, num } from '../lib/format.js';
@@ -36,9 +37,34 @@ export function PasswordInput(props) {
     </span>
   );
 }
-export const Info = ({ text }) => (
-  <span className="info"><button type="button" className="info-btn" aria-label="More information">i</button><span className="info-pop" role="tooltip">{text}</span></span>
-);
+/** (i) help bubble. Drawn on top of the whole page (not inside the card), above the button, or below it when there is no room above
+ *  (for example under the sticky filter bar), so it is never hidden or cut off. */
+export function Info({ text }) {
+  const btn = useRef(null); const pop = useRef(null); const [at, setAt] = useState(null);
+  const show = () => { const r = btn.current?.getBoundingClientRect(); if (r) setAt({ x: r.left + r.width / 2, top: r.top, bottom: r.bottom }); };
+  const hide = () => setAt(null);
+  useLayoutEffect(() => {
+    const el = pop.current; if (!at || !el) return;
+    const h = el.offsetHeight, w = el.offsetWidth;
+    const bar = document.querySelector('.filters'); const barBottom = bar ? bar.getBoundingClientRect().bottom : 0;
+    const limit = Math.max(8, barBottom > 0 && barBottom < at.top ? barBottom + 6 : 8);
+    let top = at.top - h - 8; if (top < limit) top = at.bottom + 8;
+    el.style.top = `${Math.min(top, window.innerHeight - h - 8)}px`;
+    el.style.left = `${Math.min(Math.max(8, at.x - w / 2), window.innerWidth - w - 8)}px`;
+    el.style.visibility = 'visible';
+  }, [at]);
+  useEffect(() => {
+    if (!at) return undefined;
+    window.addEventListener('scroll', hide, true); window.addEventListener('resize', hide);
+    return () => { window.removeEventListener('scroll', hide, true); window.removeEventListener('resize', hide); };
+  }, [at]);
+  return (
+    <span className="info" onMouseEnter={show} onMouseLeave={hide}>
+      <button ref={btn} type="button" className="info-btn" aria-label="More information" onFocus={show} onBlur={hide} onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (at) hide(); else show(); }}>i</button>
+      {at && createPortal(<span ref={pop} className="info-pop info-float" role="tooltip">{text}</span>, document.body)}
+    </span>
+  );
+}
 export const PageHeader = ({ title, subtitle, children }) => (
   <div className="page-head"><div className="grow"><h1>{title}</h1>{subtitle && <p>{subtitle}</p>}</div>{children}</div>
 );

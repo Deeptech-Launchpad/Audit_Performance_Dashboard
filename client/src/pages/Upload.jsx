@@ -154,7 +154,7 @@ function History({ onReview }) {
       const r = await api.post(`/api/uploads/${u.id}/open-local`);
       if (r.opened) { setMsg(`Opening ${r.original ? 'the full original file' : 'columns A to N of'} “${u.original_name}” in Excel…${r.original ? '' : ' (the original file was uploaded before full copies were kept – upload it again to open the full file).'} If Excel does not appear in a few seconds, open this file yourself: ${r.file}`); return; }
       await download(`/api/uploads/${u.id}/export`, {}, 'audit-data.xlsx');
-      setMsg(`“${u.original_name}” was downloaded as an Excel file (it can only open by itself when you use the dashboard on the computer that runs it). Open it from the download bar or the Downloads folder.`);
+      setMsg(`“${u.original_name.replace(/\.ods$/i, '.xlsx')}” is downloaded – the full file, every sheet and column, as an Excel file. Click it in the browser’s download list (the ↓ arrow at the top right) or open it from your Downloads folder. A website cannot open Excel by itself.`);
     } catch (e) { setMsg(e.message); }
   };
   const rename = async (u) => {

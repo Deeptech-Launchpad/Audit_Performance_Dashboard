@@ -105,8 +105,17 @@ export function uploadsRouter(db) {
     const base = String(up.original_name).replace(/\.(ods|xlsx|xls)$/i, '').replace(/[^\w .()-]+/g, '_').slice(0, 80);
     return { filename: `${base} (from dashboard).xlsx`, buffer: XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }), type: TYPES.xlsx, original: false };
   };
+  // Download (dashboard used from another computer, e.g. the live site): an .ods original is sent as an .xlsx copy with every sheet,
+  // row and column, so a double-click opens it in Excel (older Excel cannot open .ods). ?original=1 sends the file exactly as uploaded.
   r.get('/:id(\\d+)/export', need('view'), wrap(async (req, res) => {
-    const { filename, buffer, type } = await buildExcel(req.params.id);
+    let { filename, buffer, type } = await buildExcel(req.params.id);
+    if (req.query.original !== '1' && /\.ods$/i.test(filename)) {
+      try {
+        const wb = XLSX.read(buffer, { type: 'buffer', cellStyles: true });
+        buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx', cellStyles: true, compression: true });
+        filename = filename.replace(/\.ods$/i, '.xlsx'); type = TYPES.xlsx;
+      } catch { /* cannot convert: send the original .ods */ }
+    }
     res.set({ 'Content-Type': type, 'Content-Disposition': `attachment; filename="${filename}"` });
     res.send(buffer);
   }));

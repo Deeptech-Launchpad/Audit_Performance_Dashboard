@@ -130,7 +130,7 @@ t('import is blocked without an audit date and works with one; numbers match the
 });
 
 t('"Open in Excel": the FULL original file comes back exactly as uploaded', async () => {
-  const res = await api('GET', `/api/uploads/${globalThis.__upId}/export`, null, { raw: true });
+  const res = await api('GET', `/api/uploads/${globalThis.__upId}/export?original=1`, null, { raw: true }); // ?original=1 = exactly as uploaded (plain download converts .ods to .xlsx - see export.test.js)
   assert.equal(res.status, 200);
   assert.ok(Buffer.from(await res.arrayBuffer()).equals(fs.readFileSync(samplePath)));     // byte for byte: every sheet and column
   assert.match(res.headers.get('content-type'), /opendocument/);

@@ -128,3 +128,6 @@ body { font-size: 13px; }
 .pw-wrap > input { width: 100%; padding-right: 38px; }
 .pw-eye { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); border: 0; background: none; color: var(--ink-3); cursor: pointer; padding: 4px 6px; border-radius: 6px; display: grid; place-items: center; }
 .pw-eye:hover { color: var(--brand); background: var(--surface-2); }
+
+/* (i) help bubble: floats on top of the page (placed by Info in ui.jsx), never behind the filter bar */
+.info-pop.info-float { display: block; position: fixed; z-index: 1000; bottom: auto; transform: none; visibility: hidden; pointer-events: none; }
